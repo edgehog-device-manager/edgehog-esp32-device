@@ -1,0 +1,3 @@
+[submodule "components/astarte"]
+	path = components/astarte
+	url = https://github.com/astarte-platform/astarte-device-sdk-esp32.git
