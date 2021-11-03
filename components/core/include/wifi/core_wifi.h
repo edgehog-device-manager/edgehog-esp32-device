@@ -1,0 +1,6 @@
+#ifndef EDGEHOG_ESP32_DEVICE_CORE_WIFI_H
+#define EDGEHOG_ESP32_DEVICE_CORE_WIFI_H
+
+void core_wifi_init(void);
+
+#endif // EDGEHOG_ESP32_DEVICE_CORE_WIFI_H
