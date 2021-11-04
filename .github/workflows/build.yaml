@@ -1,0 +1,53 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2021 SECO Mind
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Edgehog App Build examples
+
+on:
+  # Run when pushing to stable branches
+  push:
+    branches:
+    - 'main'
+    - 'release-*'
+  # Run on branch/tag creation
+  create:
+  # Run on pull requests
+  pull_request:
+
+jobs:
+  build-examples:
+    strategy:
+      matrix:
+        idf-version:
+        - 4.2
+        build-system:
+        - idf
+    runs-on: ubuntu-latest
+    container: espressif/idf:v${{ matrix.idf-version }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build with idf.py
+      shell: bash
+      working-directory: ./examples/edgehog_app
+      run: |
+        . $IDF_PATH/export.sh
+        idf.py reconfigure
+        git clone https://github.com/astarte-platform/astarte-device-sdk-esp32.git ./components/astarte-device-sdk-esp32
+        idf.py build
+        # Print component size info
+        idf.py size-components

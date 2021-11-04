@@ -7,7 +7,7 @@
 * Add Astarte component
 
     ``` bash
-    git clone https://github.com/astarte-platform/astarte-device-sdk-esp32.git ./examples/edgehog_app/components/astarte-device-sdk-esp32
+    git clone https://github.com/astarte-platform/astarte-device-sdk-esp32.git ./components/astarte-device-sdk-esp32
     ```
 ### Configure the project
 
