@@ -3,5 +3,5 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := edgehog-esp32-device
+PROJECT_NAME := edgehog-app
 include $(IDF_PATH)/make/project.mk
