@@ -16,17 +16,12 @@
 # limitations under the License.
 #
 
-name: Edgehog App Build examples
-
+name: "Edgehog App Build examples"
 on:
   # Run when pushing to stable branches
   push:
     branches:
-    - 'main'
-    - 'release-*'
-  # Run on branch/tag creation
-  create:
-  # Run on pull requests
+      - 'main'
   pull_request:
 
 jobs:
@@ -34,20 +29,25 @@ jobs:
     strategy:
       matrix:
         idf-version:
-        - 4.2
+          - 4.3
         build-system:
-        - idf
+          - idf
     runs-on: ubuntu-latest
     container: espressif/idf:v${{ matrix.idf-version }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Build with idf.py
-      shell: bash
-      working-directory: ./examples/edgehog_app
-      run: |
-        . $IDF_PATH/export.sh
-        idf.py reconfigure
-        git clone https://github.com/astarte-platform/astarte-device-sdk-esp32.git ./components/astarte-device-sdk-esp32
-        idf.py build
-        # Print component size info
-        idf.py size-components
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Checkout astarte-device-sdk
+        uses: actions/checkout@v2
+        with:
+          repository: astarte-platform/astarte-device-sdk-esp32
+          path: ./examples/edgehog_app/components/astarte-device-sdk-esp32
+      - name: Build with idf.py
+        run: |
+          . $IDF_PATH/export.sh
+          idf.py reconfigure
+          idf.py build
+          # Print component size info
+          idf.py size-components
+        working-directory: ./examples/edgehog_app
+        shell: bash
