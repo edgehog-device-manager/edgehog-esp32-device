@@ -34,4 +34,4 @@ jobs:
         chmod +x run-clang-format
     - name: Check formatting
       run: |
-        ./run-clang-format --style=file -r *.c include/*.h examples/edgehog_app
+        ./run-clang-format --style=file -r src/*.c include/*.h examples/edgehog_app
