@@ -18,11 +18,22 @@
 
 #include "edgehog.h"
 #include "esp_system.h"
+#include <astarte_bson_serializer.h>
 #include <esp_err.h>
 #include <esp_heap_caps.h>
 #include <esp_log.h>
+#include <esp_timer.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <uuid.h>
 
 static const char *TAG = "EDGEHOG";
+
+struct edgehog_device_t
+{
+    char boot_id[38];
+    astarte_device_handle_t astarte_device;
+};
 
 const static astarte_interface_t hardware_info_interface
     = { .name = "io.edgehog.devicemanager.HardwareInfo",
@@ -30,6 +41,41 @@ const static astarte_interface_t hardware_info_interface
           .minor_version = 1,
           .ownership = OWNERSHIP_DEVICE,
           .type = TYPE_PROPERTIES };
+
+const static astarte_interface_t system_status_status_interface
+    = { .name = "io.edgehog.devicemanager.SystemStatus",
+          .major_version = 0,
+          .minor_version = 1,
+          .ownership = OWNERSHIP_DEVICE,
+          .type = TYPE_DATASTREAM };
+
+esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
+static void publish_device_hardware_info(astarte_device_handle_t astarte_device);
+static void publish_system_status(edgehog_device_handle_t edgehog_device);
+
+edgehog_device_handle_t edgehog_new(astarte_device_handle_t astarte_device)
+{
+    if (!astarte_device) {
+        ESP_LOGE(TAG, "Unable to init Edgehog device, Astarte device was NULL");
+        return NULL;
+    }
+
+    edgehog_device_handle_t edgehog_device = calloc(1, sizeof(struct edgehog_device_t));
+    if (!edgehog_device) {
+        ESP_LOGE(TAG, "Out of memory %s: %d", __FILE__, __LINE__);
+        return NULL;
+    }
+
+    edgehog_device->astarte_device = astarte_device;
+    uuid_t boot_id;
+    uuid_generate_v4(boot_id);
+    uuid_to_string(boot_id, edgehog_device->boot_id);
+
+    ESP_ERROR_CHECK(add_interfaces(astarte_device));
+    publish_device_hardware_info(astarte_device);
+    publish_system_status(edgehog_device);
+    return edgehog_device;
+}
 
 esp_err_t add_interfaces(astarte_device_handle_t device)
 {
@@ -41,10 +87,18 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
             hardware_info_interface.name, ret);
         return ESP_FAIL;
     }
+
+    ret = astarte_device_add_interface(device, &system_status_status_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            hardware_info_interface.name, ret);
+        return ESP_FAIL;
+    }
+
     return ESP_OK;
 }
 
-void publish_device_hardware_info(astarte_device_handle_t device)
+static void publish_device_hardware_info(astarte_device_handle_t astarte_device)
 {
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
@@ -88,19 +142,43 @@ void publish_device_hardware_info(astarte_device_handle_t device)
     mem_total_bytes += (long) heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
 #endif
     astarte_device_set_string_property(
-        device, hardware_info_interface.name, "/cpu/architecture", cpu_architecture);
+        astarte_device, hardware_info_interface.name, "/cpu/architecture", cpu_architecture);
     astarte_device_set_string_property(
-        device, hardware_info_interface.name, "/cpu/model", cpu_model);
+        astarte_device, hardware_info_interface.name, "/cpu/model", cpu_model);
     astarte_device_set_string_property(
-        device, hardware_info_interface.name, "/cpu/modelName", cpu_model_name);
+        astarte_device, hardware_info_interface.name, "/cpu/modelName", cpu_model_name);
     astarte_device_set_string_property(
-        device, hardware_info_interface.name, "/cpu/vendor", cpu_vendor);
+        astarte_device, hardware_info_interface.name, "/cpu/vendor", cpu_vendor);
     astarte_device_set_longinteger_property(
-        device, hardware_info_interface.name, "/mem/totalBytes", mem_total_bytes);
+        astarte_device, hardware_info_interface.name, "/mem/totalBytes", mem_total_bytes);
 }
 
-void edgehog_init(astarte_device_handle_t astarte_device)
+static void publish_system_status(edgehog_device_handle_t edgehog_device)
 {
-    ESP_ERROR_CHECK(add_interfaces(astarte_device));
-    publish_device_hardware_info(astarte_device);
+    int64_t uptime_millis = esp_timer_get_time() / 1000;
+    uint32_t avail_memory = esp_get_free_heap_size();
+    int task_count = uxTaskGetNumberOfTasks();
+
+    struct astarte_bson_serializer_t bs;
+    astarte_bson_serializer_init(&bs);
+    astarte_bson_serializer_append_int64(&bs, "availMemoryBytes", avail_memory);
+    astarte_bson_serializer_append_string(&bs, "bootId", edgehog_device->boot_id);
+    astarte_bson_serializer_append_int32(&bs, "taskCount", task_count);
+    astarte_bson_serializer_append_int64(&bs, "uptimeMillis", uptime_millis);
+    astarte_bson_serializer_append_end_of_document(&bs);
+
+    int doc_len;
+    const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+    astarte_device_stream_aggregate(edgehog_device->astarte_device,
+        system_status_status_interface.name, "/systemStatus", doc, 0);
+    astarte_bson_serializer_destroy(&bs);
+}
+
+void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
+{
+    if (edgehog_device) {
+        astarte_device_destroy(edgehog_device->astarte_device);
+    }
+
+    free(edgehog_device);
 }

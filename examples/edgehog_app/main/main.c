@@ -112,5 +112,5 @@ void app_main(void)
         return;
     }
 
-    edgehog_init(astarte_device);
+    edgehog_new(astarte_device);
 }
