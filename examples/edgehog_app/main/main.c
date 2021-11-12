@@ -11,7 +11,7 @@
 
 static const char *TAG = "CORE_WIFI";
 static EventGroupHandle_t wifi_event_group;
-#define NVS_PARTITION "nvs"
+static edgehog_device_handle_t edgehog_device;
 
 static void event_handler(
     void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -76,14 +76,24 @@ static void astarte_disconnection_events_handler()
     ESP_LOGW(TAG, "on_disconnected");
 }
 
+static void astarte_data_events_handler(astarte_device_data_event_t *event)
+{
+    ESP_LOGI(TAG, "Got Astarte data event, interface_name: %s, path: %s, bson_type: %d",
+        event->interface_name, event->path, event->bson_value_type);
+    edgehog_device_astarte_event_handler(edgehog_device, event);
+}
+
 astarte_device_handle_t astarte_init()
 {
     astarte_device_handle_t astarte_device = NULL;
     astarte_credentials_use_nvs_storage(NVS_PARTITION);
     astarte_credentials_init();
 
-    astarte_device_config_t cfg = { .connection_event_callback = astarte_connection_events_handler,
-        .disconnection_event_callback = astarte_disconnection_events_handler };
+    astarte_device_config_t cfg = {
+        .connection_event_callback = astarte_connection_events_handler,
+        .disconnection_event_callback = astarte_disconnection_events_handler,
+        .data_event_callback = astarte_data_events_handler,
+    };
 
     astarte_device = astarte_device_init(&cfg);
 
@@ -117,7 +127,7 @@ void app_main(void)
 
     edgehog_device_config_t edgehog_conf
         = { .astarte_device = astarte_device, .partition_label = "nvs" };
-    edgehog_device_handle_t edgehog_device = edgehog_device_new(&edgehog_conf);
+    edgehog_device = edgehog_device_new(&edgehog_conf);
 
     edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
     edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");
