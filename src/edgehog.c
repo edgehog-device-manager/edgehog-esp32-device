@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021 SECO Mind
+ * Copyright 2021 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,11 @@
 #include <esp_wifi_types.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <nvs_flash.h>
 #include <string.h>
 #include <uuid.h>
+
+#define APPLIANCE_NAMESPACE "eh_appliance"
 
 static const char *TAG = "EDGEHOG";
 
@@ -36,6 +39,7 @@ struct edgehog_device_t
 {
     char boot_id[38];
     astarte_device_handle_t astarte_device;
+    const char *partition_name;
 };
 
 const static astarte_interface_t hardware_info_interface
@@ -58,6 +62,13 @@ const static astarte_interface_t system_status_status_interface
           .minor_version = 1,
           .ownership = OWNERSHIP_DEVICE,
           .type = TYPE_DATASTREAM };
+
+const static astarte_interface_t appliance_info_interface
+    = { .name = "io.edgehog.devicemanager.ApplianceInfo",
+          .major_version = 0,
+          .minor_version = 1,
+          .ownership = OWNERSHIP_DEVICE,
+          .type = TYPE_PROPERTIES };
 
 esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
 static void publish_device_hardware_info(astarte_device_handle_t astarte_device);
@@ -86,9 +97,14 @@ static void edgehog_event_handler(
     }
 }
 
-edgehog_device_handle_t edgehog_new(astarte_device_handle_t astarte_device)
+edgehog_device_handle_t edgehog_new(edgehog_device_config_t *config)
 {
-    if (!astarte_device) {
+    if (!config) {
+        ESP_LOGE(TAG, "Unable to init Edgehog device, no config provided");
+        return NULL;
+    }
+
+    if (!config->astarte_device) {
         ESP_LOGE(TAG, "Unable to init Edgehog device, Astarte device was NULL");
         return NULL;
     }
@@ -99,13 +115,19 @@ edgehog_device_handle_t edgehog_new(astarte_device_handle_t astarte_device)
         return NULL;
     }
 
-    edgehog_device->astarte_device = astarte_device;
+    edgehog_device->astarte_device = config->astarte_device;
     uuid_t boot_id;
     uuid_generate_v4(boot_id);
     uuid_to_string(boot_id, edgehog_device->boot_id);
 
-    ESP_ERROR_CHECK(add_interfaces(astarte_device));
-    publish_device_hardware_info(astarte_device);
+    if (config->partition_label) {
+        edgehog_device->partition_name = config->partition_label;
+    } else {
+        edgehog_device->partition_name = NVS_DEFAULT_PART_NAME;
+    }
+
+    ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
+    publish_device_hardware_info(config->astarte_device);
     publish_system_status(edgehog_device);
     scan_wifi_ap(edgehog_device);
     return edgehog_device;
@@ -125,7 +147,7 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     ret = astarte_device_add_interface(device, &system_status_status_interface);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            hardware_info_interface.name, ret);
+            system_status_status_interface.name, ret);
     }
 
     ret = astarte_device_add_interface(device, &wifi_scan_result_interface);
@@ -135,6 +157,12 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
         return ESP_FAIL;
     }
 
+    ret = astarte_device_add_interface(device, &appliance_info_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            appliance_info_interface.name, ret);
+        return ESP_FAIL;
+    }
     return ESP_OK;
 }
 
@@ -275,6 +303,100 @@ static void publish_wifi_ap(edgehog_device_handle_t edgehog_device)
     }
 
     free(ap_info);
+}
+
+static esp_err_t edgehog_nvs_set_str(const char *partition_name, const char *key, char *value)
+{
+    nvs_handle nvs;
+    esp_err_t ret
+        = nvs_open_from_partition(partition_name, APPLIANCE_NAMESPACE, NVS_READWRITE, &nvs);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to open %s", partition_name);
+        return ret;
+    }
+
+    ret = nvs_set_str(nvs, key, value);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to set %s: %s. Error %d", key, value, ret);
+        nvs_close(nvs);
+        return ret;
+    }
+
+    nvs_close(nvs);
+    return ESP_OK;
+}
+
+static char *edgehog_nvs_get_string(const char *partition_name, const char *key)
+{
+    nvs_handle nvs;
+    nvs_open_from_partition(partition_name, APPLIANCE_NAMESPACE, NVS_READONLY, &nvs);
+
+    size_t required_size;
+    nvs_get_str(nvs, key, NULL, &required_size);
+    if (required_size == 0) {
+        goto error;
+    }
+    char *out_value = malloc(required_size * sizeof(char *));
+    if (!out_value) {
+        goto error;
+    }
+    nvs_get_str(nvs, key, out_value, &required_size);
+    nvs_close(nvs);
+    return out_value;
+
+error:
+    nvs_close(nvs);
+    return NULL;
+}
+
+esp_err_t edgehog_device_set_appliance_serial_number(
+    edgehog_device_handle_t edgehog_device, const char *serial_num)
+{
+    if (!serial_num) {
+        return ESP_FAIL;
+    }
+
+    char *previous_value = edgehog_nvs_get_string(edgehog_device->partition_name, "serial_number");
+    if (previous_value && strcmp(previous_value, serial_num) == 0) {
+        return ESP_OK;
+    }
+
+    esp_err_t ret = astarte_device_set_string_property(edgehog_device->astarte_device,
+        appliance_info_interface.name, "/serialNumber", (char *) serial_num);
+    if (ret != ASTARTE_OK) {
+        return ret;
+    }
+    if (edgehog_device->partition_name) {
+        return edgehog_nvs_set_str(
+            edgehog_device->partition_name, "serial_number", (char *) serial_num);
+    } else {
+        return ESP_OK;
+    }
+}
+
+esp_err_t edgehog_device_set_appliance_part_number(
+    edgehog_device_handle_t edgehog_device, const char *part_num)
+{
+    if (!part_num) {
+        return ESP_FAIL;
+    }
+
+    char *previous_value = edgehog_nvs_get_string(edgehog_device->partition_name, "part_number");
+    if (previous_value && strcmp(previous_value, part_num) == 0) {
+        return ESP_OK;
+    }
+
+    esp_err_t ret = astarte_device_set_string_property(edgehog_device->astarte_device,
+        appliance_info_interface.name, "/partNumber", (char *) part_num);
+    if (ret != ASTARTE_OK) {
+        return ret;
+    }
+    if (edgehog_device->partition_name) {
+        return edgehog_nvs_set_str(
+            edgehog_device->partition_name, "part_number", (char *) part_num);
+    } else {
+        return ESP_OK;
+    }
 }
 
 void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)

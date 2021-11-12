@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021 SECO Mind
+ * Copyright 2021 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,42 @@ extern "C" {
 #endif
 
 #include <astarte_device.h>
+#include <esp_err.h>
+
+/**
+ * @brief Edgehog device configuration struct
+ *
+ * @details This struct is used to collect all the data needed by the edgehog_new function.
+ * Pay attention that astarte_device is required and must not be null, while partition_label is
+ * completely optional. If no partition label is provided, NVS_DEFAULT_PART_NAME will be used.
+ * The values provided with this struct are not copied, do not free() them before calling
+ * edgehog_device_destroy.
+ */
+typedef struct
+{
+    astarte_device_handle_t astarte_device;
+    const char *partition_label;
+} edgehog_device_config_t;
+
 /**
  * @brief create Edgehog device handle.
  *
  * @details This function creates an Edgehog device handle. It must be called before anything else.
- * @param astarte_device A valid Astarte device handle.
+ *
+ * Example:
+ *  astarte_device_handle_t astarte_device = astarte_device_init();
+ *
+ *  edgehog_device_config_t edgehog_conf = {
+ *      .astarte_device = astarte_device,
+ *  };
+ *
+ *  edgehog_device_handle_t edgehog_device = edgehog_new(&edgehog_conf);
+ *
+ * @param config An edgehog_device_config_t struct.
  * @return The handle to the device, NULL if an error occurred.
  */
 
-edgehog_device_handle_t edgehog_new(astarte_device_handle_t astarte_device);
+edgehog_device_handle_t edgehog_new(edgehog_device_config_t *config);
 
 /**
  * @brief destroy Edgehog device.
@@ -43,6 +70,30 @@ edgehog_device_handle_t edgehog_new(astarte_device_handle_t astarte_device);
  * @param edgehog_device A valid Edgehog device handle.
  */
 void edgehog_device_destroy(edgehog_device_handle_t edgehog_device);
+
+/**
+ * @brief set the appliance serial number
+ *
+ * @details This function sends the appliance serial number on Astarte and stores it on the nvs.
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ * @param serial_num The serial number to be stored
+ * @return ESP_OK if the data was successfully stored and sent, an esp_err_t otherwise.
+ */
+esp_err_t edgehog_device_set_appliance_serial_number(
+    edgehog_device_handle_t edgehog_device, const char *serial_num);
+
+/**
+ * @brief set the appliance part number
+ *
+ * @details This function sends the appliance part number on Astarte and stores it on the nvs.
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ * @param part_num The part number to be stored
+ * @return ESP_OK if the data was successfully stored and sent, an esp_err_t otherwise.
+ */
+esp_err_t edgehog_device_set_appliance_part_number(
+    edgehog_device_handle_t edgehog_device, const char *part_num);
 
 #ifdef __cplusplus
 }

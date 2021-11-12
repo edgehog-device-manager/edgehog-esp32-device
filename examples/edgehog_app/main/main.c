@@ -105,6 +105,8 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
     wifi_init();
+    ESP_ERROR_CHECK(nvs_flash_init());
+
     astarte_device_handle_t astarte_device = astarte_init();
 
     if (astarte_device && astarte_device_start(astarte_device) != ASTARTE_OK) {
@@ -112,5 +114,10 @@ void app_main(void)
         return;
     }
 
-    edgehog_new(astarte_device);
+    edgehog_device_config_t edgehog_conf
+        = { .astarte_device = astarte_device, .partition_label = "nvs" };
+    edgehog_device_handle_t edgehog_device = edgehog_new(&edgehog_conf);
+
+    edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
+    edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");
 }
