@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef EDGEHOG_H
-#define EDGEHOG_H
+#ifndef EDGEHOG_DEVICE_H
+#define EDGEHOG_DEVICE_H
 
 typedef struct edgehog_device_t *edgehog_device_handle_t;
 
@@ -31,7 +31,7 @@ extern "C" {
 /**
  * @brief Edgehog device configuration struct
  *
- * @details This struct is used to collect all the data needed by the edgehog_new function.
+ * @details This struct is used to collect all the data needed by the edgehog_device_new function.
  * Pay attention that astarte_device is required and must not be null, while partition_label is
  * completely optional. If no partition label is provided, NVS_DEFAULT_PART_NAME will be used.
  * The values provided with this struct are not copied, do not free() them before calling
@@ -55,13 +55,13 @@ typedef struct
  *      .astarte_device = astarte_device,
  *  };
  *
- *  edgehog_device_handle_t edgehog_device = edgehog_new(&edgehog_conf);
+ *  edgehog_device_handle_t edgehog_device = edgehog_device_new(&edgehog_conf);
  *
  * @param config An edgehog_device_config_t struct.
  * @return The handle to the device, NULL if an error occurred.
  */
 
-edgehog_device_handle_t edgehog_new(edgehog_device_config_t *config);
+edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config);
 
 /**
  * @brief destroy Edgehog device.
