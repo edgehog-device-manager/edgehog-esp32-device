@@ -1,4 +1,4 @@
-#include "edgehog.h"
+#include "edgehog_device.h"
 #include <astarte_credentials.h>
 #include <esp_log.h>
 #include <esp_system.h>
@@ -7,6 +7,7 @@
 #include <nvs_flash.h>
 
 #define WIFI_CONNECTED_BIT BIT0
+#define NVS_PARTITION "nvs"
 
 static const char *TAG = "CORE_WIFI";
 static EventGroupHandle_t wifi_event_group;
@@ -116,7 +117,7 @@ void app_main(void)
 
     edgehog_device_config_t edgehog_conf
         = { .astarte_device = astarte_device, .partition_label = "nvs" };
-    edgehog_device_handle_t edgehog_device = edgehog_new(&edgehog_conf);
+    edgehog_device_handle_t edgehog_device = edgehog_device_new(&edgehog_conf);
 
     edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
     edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "edgehog.h"
+#include "edgehog_device.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
 #include <esp_err.h>
@@ -70,7 +70,7 @@ const static astarte_interface_t appliance_info_interface
           .ownership = OWNERSHIP_DEVICE,
           .type = TYPE_PROPERTIES };
 
-esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
+static esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
 static void publish_device_hardware_info(astarte_device_handle_t astarte_device);
 static void publish_system_status(edgehog_device_handle_t edgehog_device);
 static void publish_wifi_ap(edgehog_device_handle_t edgehog_device);
@@ -97,7 +97,7 @@ static void edgehog_event_handler(
     }
 }
 
-edgehog_device_handle_t edgehog_new(edgehog_device_config_t *config)
+edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
 {
     if (!config) {
         ESP_LOGE(TAG, "Unable to init Edgehog device, no config provided");
@@ -252,7 +252,7 @@ static void scan_wifi_ap(edgehog_device_handle_t edgehog_device)
     if (ret != ESP_OK) {
         ESP_LOGE(TAG,
             "Unable to register to default event loop. Be sure to have called "
-            "esp_event_loop_create_default() before calling edgehog_new");
+            "esp_event_loop_create_default() before calling edgehog_device_new");
         return;
     }
 
@@ -322,6 +322,7 @@ static esp_err_t edgehog_nvs_set_str(const char *partition_name, const char *key
         return ret;
     }
 
+    nvs_commit(nvs);
     nvs_close(nvs);
     return ESP_OK;
 }
