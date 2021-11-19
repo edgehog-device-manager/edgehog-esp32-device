@@ -473,3 +473,23 @@ esp_err_t edgehog_device_nvs_open(
 
     return ESP_OK;
 }
+
+void edgehog_device_publish_telemetry(
+    edgehog_device_handle_t edgehog_device, edgehog_device_telemetry_type_t type)
+{
+    if (!edgehog_device) {
+        return;
+    }
+
+    switch (type) {
+        case EH_TM_SYSTEM:
+            publish_system_status(edgehog_device);
+            break;
+        case EH_TM_LOCATION:
+            scan_wifi_ap(edgehog_device);
+            break;
+        default:
+            publish_system_status(edgehog_device);
+            scan_wifi_ap(edgehog_device);
+    }
+}

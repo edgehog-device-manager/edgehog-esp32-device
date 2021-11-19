@@ -108,6 +108,25 @@ esp_err_t edgehog_device_set_appliance_part_number(
 void edgehog_device_astarte_event_handler(
     edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event);
 
+typedef enum
+{
+    EH_TM_ALL, /**< telemetry: all */
+    EH_TM_SYSTEM, /**< telemetry: system */
+    EH_TM_LOCATION, /**< telemetry: location */
+} edgehog_device_telemetry_type_t;
+
+/**
+ * @brief publish Edgehog telemetry.
+ *
+ * @details This function sends the Edgehog telemetry,
+ * according to the selected type;
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ * @param type Edgehog telemetry type.
+ */
+void edgehog_device_publish_telemetry(
+    edgehog_device_handle_t edgehog_device, edgehog_device_telemetry_type_t type);
+
 #ifdef __cplusplus
 }
 #endif

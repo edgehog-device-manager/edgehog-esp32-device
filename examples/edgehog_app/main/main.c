@@ -8,6 +8,7 @@
 
 #define WIFI_CONNECTED_BIT BIT0
 #define NVS_PARTITION "nvs"
+#define TELEMETRY_DELAY_MS 1000 * 60 * 10
 
 static const char *TAG = "CORE_WIFI";
 static EventGroupHandle_t wifi_event_group;
@@ -107,6 +108,17 @@ astarte_device_handle_t astarte_init()
     return astarte_device;
 }
 
+static void telemetry_loop()
+{
+    vTaskDelay(pdMS_TO_TICKS(TELEMETRY_DELAY_MS));
+    for (;;) {
+        if (edgehog_device) {
+            edgehog_device_publish_telemetry(edgehog_device, EH_TM_ALL);
+        }
+        vTaskDelay(pdMS_TO_TICKS(TELEMETRY_DELAY_MS));
+    }
+}
+
 void app_main(void)
 {
     esp_err_t ret = nvs_flash_init();
@@ -131,4 +143,6 @@ void app_main(void)
 
     edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
     edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");
+
+    xTaskCreate(telemetry_loop, "telemetry", 4096, NULL, 5, NULL);
 }
