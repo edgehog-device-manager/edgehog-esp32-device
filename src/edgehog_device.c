@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-#include "edgehog_device.h"
+#include "edgehog_device_private.h"
+#include "edgehog_ota.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
 #include <esp_err.h>
@@ -27,7 +28,6 @@
 #include <esp_wifi_types.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <nvs_flash.h>
 #include <string.h>
 #include <uuid.h>
 
@@ -37,7 +37,7 @@ static const char *TAG = "EDGEHOG";
 
 struct edgehog_device_t
 {
-    char boot_id[38];
+    char boot_id[ASTARTE_UUID_LEN];
     astarte_device_handle_t astarte_device;
     const char *partition_name;
 };
@@ -97,6 +97,27 @@ static void edgehog_event_handler(
     }
 }
 
+void edgehog_device_astarte_event_handler(
+    edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event)
+{
+    if (!edgehog_device) {
+        ESP_LOGE(TAG, "Unable to handle event, Edgehog device undefined");
+        return;
+    }
+
+    if (strcmp(event->interface_name, ota_request_interface.name) == 0) {
+        // Beware this function blocks the caller until OTA is completed.
+        edgehog_err_t ota_result
+            = edgehog_ota_event(edgehog_device, edgehog_device->astarte_device, event);
+        if (ota_result == EDGEHOG_OK) {
+            ESP_LOGI(TAG, "OTA Deploy end successfully, device restart in 5 seconds");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+            ESP_LOGI(TAG, "Device restart");
+            esp_restart();
+        }
+    }
+}
+
 edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
 {
     if (!config) {
@@ -127,6 +148,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     }
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
+    edgehog_ota_init(edgehog_device, config->astarte_device);
     publish_device_hardware_info(config->astarte_device);
     publish_system_status(edgehog_device);
     scan_wifi_ap(edgehog_device);
@@ -163,6 +185,21 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
             appliance_info_interface.name, ret);
         return ESP_FAIL;
     }
+
+    ret = astarte_device_add_interface(device, &ota_request_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            ota_request_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &ota_response_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            ota_response_interface.name, ret);
+        return ESP_FAIL;
+    }
+
     return ESP_OK;
 }
 
@@ -407,4 +444,17 @@ void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
     }
 
     free(edgehog_device);
+}
+
+esp_err_t edgehog_device_nvs_open(
+    edgehog_device_handle_t edgehog_device, char *namespace, nvs_handle_t *out_handle)
+{
+    esp_err_t ret = nvs_open_from_partition(
+        edgehog_device->partition_name, namespace, NVS_READWRITE, out_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to open %s", edgehog_device->partition_name);
+        return ret;
+    }
+
+    return ESP_OK;
 }

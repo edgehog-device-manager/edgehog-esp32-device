@@ -25,8 +25,10 @@ typedef struct edgehog_device_t *edgehog_device_handle_t;
 extern "C" {
 #endif
 
+#include "edgehog.h"
 #include <astarte_device.h>
 #include <esp_err.h>
+#include <nvs.h>
 
 /**
  * @brief Edgehog device configuration struct
@@ -95,8 +97,19 @@ esp_err_t edgehog_device_set_appliance_serial_number(
 esp_err_t edgehog_device_set_appliance_part_number(
     edgehog_device_handle_t edgehog_device, const char *part_num);
 
+/**
+ * @brief receive data from Astarte Server.
+ *
+ * @details This function must be called when an Astarte Data event coming from server.
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ * @param event A valid Astarte device data event.
+ */
+void edgehog_device_astarte_event_handler(
+    edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // EDGEHOG_H
+#endif // EDGEHOG_DEVICE_H
