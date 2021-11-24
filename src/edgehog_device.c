@@ -369,7 +369,7 @@ static char *edgehog_nvs_get_string(const char *partition_name, const char *key)
     nvs_handle nvs;
     nvs_open_from_partition(partition_name, APPLIANCE_NAMESPACE, NVS_READONLY, &nvs);
 
-    size_t required_size;
+    size_t required_size = 0;
     nvs_get_str(nvs, key, NULL, &required_size);
     if (required_size == 0) {
         goto error;
