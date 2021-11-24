@@ -395,21 +395,29 @@ esp_err_t edgehog_device_set_appliance_serial_number(
     }
 
     char *previous_value = edgehog_nvs_get_string(edgehog_device->partition_name, "serial_number");
+    esp_err_t ret;
     if (previous_value && strcmp(previous_value, serial_num) == 0) {
-        return ESP_OK;
+        ret = ESP_OK;
+        goto end;
     }
 
-    esp_err_t ret = astarte_device_set_string_property(edgehog_device->astarte_device,
+    ret = astarte_device_set_string_property(edgehog_device->astarte_device,
         appliance_info_interface.name, "/serialNumber", (char *) serial_num);
     if (ret != ASTARTE_OK) {
-        return ret;
+        ESP_LOGE(TAG, "Unable to publish serialNumber property. Astarte Error %d", ret);
+        ret = ESP_FAIL;
+        goto end;
     }
     if (edgehog_device->partition_name) {
-        return edgehog_nvs_set_str(
+        ret = edgehog_nvs_set_str(
             edgehog_device->partition_name, "serial_number", (char *) serial_num);
     } else {
-        return ESP_OK;
+        ret = ESP_OK;
     }
+
+end:
+    free(previous_value);
+    return ret;
 }
 
 esp_err_t edgehog_device_set_appliance_part_number(
@@ -420,21 +428,28 @@ esp_err_t edgehog_device_set_appliance_part_number(
     }
 
     char *previous_value = edgehog_nvs_get_string(edgehog_device->partition_name, "part_number");
+    esp_err_t ret;
     if (previous_value && strcmp(previous_value, part_num) == 0) {
-        return ESP_OK;
+        ret = ESP_OK;
+        goto end;
     }
 
-    esp_err_t ret = astarte_device_set_string_property(edgehog_device->astarte_device,
+    ret = astarte_device_set_string_property(edgehog_device->astarte_device,
         appliance_info_interface.name, "/partNumber", (char *) part_num);
     if (ret != ASTARTE_OK) {
-        return ret;
+        ESP_LOGE(TAG, "Unable to publish partNumber property. Astarte Error %d", ret);
+        ret = ESP_FAIL;
+        goto end;
     }
     if (edgehog_device->partition_name) {
-        return edgehog_nvs_set_str(
-            edgehog_device->partition_name, "part_number", (char *) part_num);
+        ret = edgehog_nvs_set_str(edgehog_device->partition_name, "part_number", (char *) part_num);
     } else {
-        return ESP_OK;
+        ret = ESP_OK;
     }
+
+end:
+    free(previous_value);
+    return ret;
 }
 
 void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
