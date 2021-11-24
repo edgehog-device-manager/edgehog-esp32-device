@@ -1,0 +1,14 @@
+/** @mainpage Edgehog Device SDK ESP32 Documentation
+
+@version Unreleased
+
+ * The Edgehog device SDK allows connecting an ESP32 device to Edgehog platform.
+ *
+ * @par ""
+ *
+ * The entry point for the SDK is @ref edgehog_device.h.
+ *
+ * @par ""
+ *
+ * See ...
+*/

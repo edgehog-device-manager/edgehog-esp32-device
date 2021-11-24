@@ -1,0 +1,59 @@
+name: Docs generation for Github Pages
+
+on:
+  push:
+    paths:
+    # Headers
+    - 'include/*'
+    # Doc updates
+    - 'doc/*'
+    # The action itself
+    - '.github/workflows/docs-workflow.yaml'
+    branches:
+    # Create the docs only when it matters
+    - 'main'
+    - 'release-*'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout the source
+    - uses: actions/checkout@v2
+      with:
+        path: edgehog-device-esp32
+    # Checkout the docs repository
+    - uses: actions/checkout@v2
+      with:
+        repository: edgehog-device-manager/docs
+        path: docs
+    - name: Install doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install doxygen
+    - name: Build Docs
+      working-directory: ./edgehog-device-esp32/doc
+      run: doxygen edgehog-device-sdk-esp32.doxy
+    - name: Copy Docs
+      run: |
+        export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')/device-sdks/esp32"
+        rm -rf docs/$DOCS_DIRNAME
+        mkdir -p docs/$DOCS_DIRNAME
+        cp -r edgehog-device-esp32/doc/out/html/* docs/$DOCS_DIRNAME/
+    - name: Commit files
+      working-directory: ./docs
+      run: |
+        git config --local user.email "edgehog-machine@secomind.com"
+        git config --local user.name "Edgehog Bot"
+        git add .
+        git commit -m "Update Edgehog ESP32 SDK documentation"
+    - name: Push changes
+      working-directory: ./docs
+      run: |
+        eval `ssh-agent -t 60 -s`
+        echo "${{ secrets.DOCS_DEPLOY_KEY }}" | ssh-add -
+        mkdir -p ~/.ssh/
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        git remote add topush "git@github.com:edgehog-device-manager/docs.git"
+        git fetch topush
+        git push topush main
