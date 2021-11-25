@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+#include "edgehog_battery_status.h"
 #include "edgehog_device_private.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
@@ -206,6 +207,13 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             storage_usage_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &battery_status_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            battery_status_interface.name, ret);
         return ESP_FAIL;
     }
 
