@@ -1,5 +1,6 @@
 set(edgehog_srcs "src/edgehog_device.c"
-        "src/edgehog_ota.c")
+        "src/edgehog_ota.c"
+        "src/edgehog_storage_usage.c")
 
 idf_component_register(SRCS "${edgehog_srcs}"
         INCLUDE_DIRS "include"
