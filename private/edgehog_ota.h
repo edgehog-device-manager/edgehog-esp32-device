@@ -25,19 +25,8 @@ extern "C" {
 
 #include "edgehog_device.h"
 
-const static astarte_interface_t ota_request_interface
-    = { .name = "io.edgehog.devicemanager.OTARequest",
-          .major_version = 0,
-          .minor_version = 1,
-          .ownership = OWNERSHIP_SERVER,
-          .type = TYPE_DATASTREAM };
-
-const static astarte_interface_t ota_response_interface
-    = { .name = "io.edgehog.devicemanager.OTAResponse",
-          .major_version = 0,
-          .minor_version = 1,
-          .ownership = OWNERSHIP_DEVICE,
-          .type = TYPE_DATASTREAM };
+extern const astarte_interface_t ota_request_interface;
+extern const astarte_interface_t ota_response_interface;
 
 /**
  * @brief initialize Edgehog device OTA.
