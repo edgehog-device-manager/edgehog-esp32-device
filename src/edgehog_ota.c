@@ -47,6 +47,18 @@ typedef enum
     OTA_SUCCESS
 } edgehog_ota_state;
 
+const astarte_interface_t ota_request_interface = { .name = "io.edgehog.devicemanager.OTARequest",
+    .major_version = 0,
+    .minor_version = 1,
+    .ownership = OWNERSHIP_SERVER,
+    .type = TYPE_DATASTREAM };
+
+const astarte_interface_t ota_response_interface = { .name = "io.edgehog.devicemanager.OTAResponse",
+    .major_version = 0,
+    .minor_version = 1,
+    .ownership = OWNERSHIP_DEVICE,
+    .type = TYPE_DATASTREAM };
+
 static bool is_partition_changed(nvs_handle handle);
 static void publish_ota_data(astarte_device_handle_t astarte_device, const char *request_uuid,
     edgehog_ota_state state, edgehog_err_t error);
