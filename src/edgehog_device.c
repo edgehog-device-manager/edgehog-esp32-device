@@ -72,6 +72,8 @@ const static astarte_interface_t appliance_info_interface
           .ownership = OWNERSHIP_DEVICE,
           .type = TYPE_PROPERTIES };
 
+ESP_EVENT_DEFINE_BASE(EDGEHOG_EVENTS);
+
 static esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
 static void publish_device_hardware_info(astarte_device_handle_t astarte_device);
 static void publish_system_status(edgehog_device_handle_t edgehog_device);

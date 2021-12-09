@@ -1,4 +1,5 @@
 #include "edgehog_device.h"
+#include "edgehog_event.h"
 #include <astarte_credentials.h>
 #include <esp_log.h>
 #include <esp_system.h>
@@ -16,15 +17,24 @@ static edgehog_device_handle_t edgehog_device;
 static void event_handler(
     void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
-        ESP_LOGI(TAG, "connect to the AP fail");
+    if (event_base == WIFI_EVENT) {
+        switch (event_id) {
+            case WIFI_EVENT_STA_START:
+                esp_wifi_connect();
+                break;
+            case WIFI_EVENT_STA_DISCONNECTED:
+                xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
+                ESP_LOGI(TAG, "connect to the AP fail");
+                break;
+            default:
+                ESP_LOGD(TAG, "event not supported");
+        }
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
+    } else if (event_base == EDGEHOG_EVENTS) {
+        ESP_LOGI(TAG, "EDGEHOG EVENT RECEIVED %d", event_id);
     }
 }
 
@@ -124,6 +134,9 @@ void app_main(void)
         ESP_LOGE(TAG, "Failed to start astarte device");
         return;
     }
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        EDGEHOG_EVENTS, ESP_EVENT_ANY_ID, event_handler, NULL, NULL));
 
     edgehog_device_config_t edgehog_conf
         = { .astarte_device = astarte_device, .partition_label = "nvs" };
