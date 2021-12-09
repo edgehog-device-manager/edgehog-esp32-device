@@ -2,7 +2,8 @@ set(edgehog_srcs "src/edgehog_device.c"
         "src/edgehog_ota.c"
         "src/edgehog_storage_usage.c"
         "src/edgehog_battery_status.c"
-        "src/edgehog_command.c")
+        "src/edgehog_command.c"
+        "src/edgehog_os_info.c")
 
 idf_component_register(SRCS "${edgehog_srcs}"
         INCLUDE_DIRS "include"

@@ -19,6 +19,7 @@
 #include "edgehog_battery_status.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
+#include "edgehog_os_info.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
 #include "esp_system.h"
@@ -162,6 +163,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     publish_system_status(edgehog_device);
     scan_wifi_ap(edgehog_device);
     edgehog_storage_usage_publish(edgehog_device->astarte_device);
+    edgehog_device_publish_os_info(edgehog_device->astarte_device);
     return edgehog_device;
 }
 
@@ -228,6 +230,13 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             commands_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &os_info_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            os_info_interface.name, ret);
         return ESP_FAIL;
     }
 
