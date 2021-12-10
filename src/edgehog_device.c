@@ -17,6 +17,7 @@
  */
 
 #include "edgehog_battery_status.h"
+#include "edgehog_command.h"
 #include "edgehog_device_private.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
@@ -119,6 +120,10 @@ void edgehog_device_astarte_event_handler(
             ESP_LOGI(TAG, "Device restart");
             esp_restart();
         }
+    } else if (strcmp(event->interface_name, commands_interface.name) == 0) {
+        if (edgehog_command_event(event) != EDGEHOG_OK) {
+            ESP_LOGE(TAG, "Unable to handle command request");
+        }
     }
 }
 
@@ -216,6 +221,13 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             battery_status_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &commands_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            commands_interface.name, ret);
         return ESP_FAIL;
     }
 
