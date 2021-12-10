@@ -18,6 +18,7 @@
 
 #include "edgehog_ota.h"
 #include "edgehog_device_private.h"
+#include "edgehog_event.h"
 #include <astarte_bson.h>
 #include <astarte_bson_serializer.h>
 #include <astarte_bson_types.h>
@@ -179,6 +180,8 @@ static edgehog_err_t do_ota(edgehog_device_handle_t edgehog_device,
     astarte_device_handle_t astarte_device, const char *request_uuid, const char *ota_url)
 {
     ESP_LOGI(TAG, "INIT");
+    esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_INIT_EVENT, NULL, 0, 0);
+
     nvs_handle_t handle;
     esp_err_t esp_ret = edgehog_device_nvs_open(edgehog_device, OTA_NAMESPACE, &handle);
 
@@ -301,6 +304,12 @@ static void publish_ota_data(astarte_device_handle_t astarte_device, const char 
     astarte_device_stream_aggregate(
         astarte_device, ota_response_interface.name, "/response", doc, 0);
     astarte_bson_serializer_destroy(&bs);
+
+    if (state == OTA_SUCCESS) {
+        esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_SUCCESS_EVENT, NULL, 0, 0);
+    } else if (state == OTA_FAILED) {
+        esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_FAILED_EVENT, NULL, 0, 0);
+    }
 }
 
 static bool is_partition_changed(nvs_handle handle)
