@@ -26,6 +26,7 @@
 #include "edgehog_os_bundle.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
+#include "edgehog_telemetry.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
 #include <esp_err.h>
@@ -51,6 +52,7 @@ struct edgehog_device_t
 #if CONFIG_INDICATOR_GPIO_ENABLE
     edgehog_led_behavior_manager_handle_t led_manager;
 #endif
+    edgehog_telemetry_t *edgehog_telemetry;
 };
 
 const static astarte_interface_t hardware_info_interface
@@ -84,7 +86,7 @@ const static astarte_interface_t appliance_info_interface
 ESP_EVENT_DEFINE_BASE(EDGEHOG_EVENTS);
 
 static esp_err_t add_interfaces(astarte_device_handle_t astarte_device);
-static void publish_device_hardware_info(astarte_device_handle_t astarte_device);
+static void publish_device_hardware_info(edgehog_device_handle_t edgehog_device);
 static void publish_system_status(edgehog_device_handle_t edgehog_device);
 static void publish_wifi_ap(edgehog_device_handle_t edgehog_device);
 static void scan_wifi_ap(edgehog_device_handle_t edgehog_device);
@@ -132,6 +134,12 @@ void edgehog_device_astarte_event_handler(
         if (edgehog_command_event(event) != EDGEHOG_OK) {
             ESP_LOGE(TAG, "Unable to handle command request");
         }
+    } else if (strcmp(event->interface_name, telemetry_config_interface.name) == 0) {
+        edgehog_err_t telemetry_config_result = edgehog_telemetry_config_event(
+            event, edgehog_device, edgehog_device->edgehog_telemetry);
+        if (telemetry_config_result == EDGEHOG_OK) {
+            ESP_LOGI(TAG, "Telemetry config update handled successfully");
+        }
     }
 #if CONFIG_INDICATOR_GPIO_ENABLE
     if (strcmp(event->interface_name, led_request_interface.name) == 0) {
@@ -176,7 +184,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
     edgehog_ota_init(edgehog_device, config->astarte_device);
-    publish_device_hardware_info(config->astarte_device);
+    publish_device_hardware_info(edgehog_device);
     publish_system_status(edgehog_device);
     scan_wifi_ap(edgehog_device);
     edgehog_storage_usage_publish(edgehog_device->astarte_device);
@@ -185,7 +193,30 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     edgehog_device->led_manager = edgehog_led_behavior_manager_new();
 #endif
     edgehog_os_bundle_data_publish(edgehog_device->astarte_device);
+    edgehog_telemetry_t *edgehog_telemetry
+        = edgehog_telemetry_new(config->telemetry_config, config->telemetry_config_len);
+    if (!edgehog_telemetry) {
+        ESP_LOGE(TAG, "Unable to create edgehog telemetry update");
+        goto error;
+    }
+    edgehog_device->edgehog_telemetry = edgehog_telemetry;
+
     return edgehog_device;
+
+error:
+    edgehog_device_destroy(edgehog_device);
+    return NULL;
+}
+
+edgehog_err_t edgehog_device_start(edgehog_device_handle_t edgehog_device)
+{
+    edgehog_err_t start_res
+        = edgehog_telemetry_start(edgehog_device, edgehog_device->edgehog_telemetry);
+    if (start_res != EDGEHOG_OK) {
+        ESP_LOGE(TAG, "Unable to start Edgehog device");
+    }
+
+    return start_res;
 }
 
 esp_err_t add_interfaces(astarte_device_handle_t device)
@@ -262,6 +293,12 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     }
 #endif
 
+    ret = astarte_device_add_interface(device, &telemetry_config_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            telemetry_config_interface.name, ret);
+    }
+
     ret = astarte_device_add_interface(device, &os_info_interface);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
@@ -279,7 +316,7 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     return ESP_OK;
 }
 
-static void publish_device_hardware_info(astarte_device_handle_t astarte_device)
+static void publish_device_hardware_info(edgehog_device_handle_t edgehog_device)
 {
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
@@ -322,6 +359,7 @@ static void publish_device_hardware_info(astarte_device_handle_t astarte_device)
 #ifdef CONFIG_SPIRAM_USE
     mem_total_bytes += (long) heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
 #endif
+    astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
     astarte_device_set_string_property(
         astarte_device, hardware_info_interface.name, "/cpu/architecture", cpu_architecture);
     astarte_device_set_string_property(
@@ -532,6 +570,7 @@ void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
 {
     if (edgehog_device) {
         astarte_device_destroy(edgehog_device->astarte_device);
+        edgehog_telemetry_destroy(edgehog_device->edgehog_telemetry);
     }
 
     free(edgehog_device);
@@ -548,4 +587,37 @@ esp_err_t edgehog_device_nvs_open(
     }
 
     return ESP_OK;
+}
+
+nvs_iterator_t edgehog_device_nvs_entry_find(
+    edgehog_device_handle_t edgehog_device, const char *namespace, nvs_type_t type)
+{
+    return nvs_entry_find(edgehog_device->partition_name, namespace, type);
+}
+
+telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
+{
+    switch (type) {
+        case EDGEHOG_TELEMETRY_HW_INFO:
+            return publish_device_hardware_info;
+        case EDGEHOG_TELEMETRY_WIFI_SCAN:
+            return scan_wifi_ap;
+        case EDGEHOG_TELEMETRY_SYSTEM_STATUS:
+            return publish_system_status;
+        default:
+            return NULL;
+    }
+}
+
+telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
+{
+    if (strcmp(interface_name, hardware_info_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_HW_INFO;
+    } else if (strcmp(interface_name, wifi_scan_result_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_WIFI_SCAN;
+    } else if (strcmp(interface_name, system_status_status_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_SYSTEM_STATUS;
+    } else {
+        return EDGEHOG_TELEMETRY_INVALID;
+    }
 }

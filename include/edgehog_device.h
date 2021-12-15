@@ -31,6 +31,36 @@ extern "C" {
 #include <nvs.h>
 
 /**
+ * @brief Edgehog telemetry types.
+ *
+ * @details This enum is used for configuring the telemetry type in
+ * `edgehog_device_telemetry_config_t` struct.
+ */
+typedef enum
+{
+    EDGEHOG_TELEMETRY_INVALID = 0, /**< The telemetry type is invalid. */
+    EDGEHOG_TELEMETRY_HW_INFO = 1, /**< The hardware info telemetry type. */
+    EDGEHOG_TELEMETRY_WIFI_SCAN = 2, /**< The wifi scan telemetry type. */
+    EDGEHOG_TELEMETRY_SYSTEM_STATUS = 3 /**< The system status telemetry type. */
+} telemetry_type_t;
+
+/**
+ * @brief Edgehog device configuration struct
+ *
+ * Example:
+ *  edgehog_device_telemetry_config_t telemetry_config =
+ *  {
+ *      .type = EDGEHOG_TL_WIFI_SCAN,
+ *      .period_seconds = 5
+ *   };
+ */
+typedef struct
+{
+    telemetry_type_t type;
+    long period_seconds;
+} edgehog_device_telemetry_config_t;
+
+/**
  * @brief Edgehog device configuration struct
  *
  * @details This struct is used to collect all the data needed by the edgehog_device_new function.
@@ -43,6 +73,8 @@ typedef struct
 {
     astarte_device_handle_t astarte_device;
     const char *partition_label;
+    edgehog_device_telemetry_config_t *telemetry_config;
+    size_t telemetry_config_len;
 } edgehog_device_config_t;
 
 /**
@@ -107,6 +139,15 @@ esp_err_t edgehog_device_set_appliance_part_number(
  */
 void edgehog_device_astarte_event_handler(
     edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event);
+
+/**
+ * @brief start Edgehog device.
+ *
+ * @details This function starts the device, enabling the telemetry update if configured.
+ * @param device A valid Edgehog device handle.
+ * @return EDGEHOG_OK if the device was successfully started, another edgehog_err_t otherwise.
+ */
+edgehog_err_t edgehog_device_start(edgehog_device_handle_t edgehog_device);
 
 #ifdef __cplusplus
 }

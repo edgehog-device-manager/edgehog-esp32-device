@@ -40,6 +40,52 @@ extern "C" {
 esp_err_t edgehog_device_nvs_open(
     edgehog_device_handle_t edgehog_device, char *name, nvs_handle_t *out_handle);
 
+/**
+ * @brief create an iterator to enumerate NVS entries based on one or more parameters.
+ *
+ * @details This function create an in iterator from specified partition defined in the
+ * edgehog_device_config_t to enumerate NVS entries based on one or more parameters
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ * @param namespace Namespace name.
+ * @param type One of nvs_type_t values.
+ *
+ * @return Iterator used to enumerate all the entries found,or NULL if no entry satisfying criteria
+ * was found. Iterator obtained through this function has to be released using nvs_release_iterator
+ * when not used any more.
+ */
+nvs_iterator_t edgehog_device_nvs_entry_find(
+    edgehog_device_handle_t edgehog_device, const char *namespace, nvs_type_t type);
+
+/**
+ * @brief Telemetry periodic callback type.
+ */
+typedef void (*telemetry_periodic)(edgehog_device_handle_t edgehog_device);
+
+/**
+ * @brief get a telemetry periodic callback.
+ *
+ * @details This function returns a telemetry periodic based on telemetry_type parameter.
+ *
+ * @param type One of telemetry_type_t values.
+ *
+ * @return a telemetry periodic,or NULL if no periodic satisfying criteria
+ * was found.
+ */
+telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type);
+
+/**
+ * @brief get a telemetry type.
+ *
+ * @details This function returns a telemetry type based on interface_name parameter.
+ *
+ * @param interface_name The interface name.
+ *
+ * @return a telemetry type,or EDGEHOG_TL_INVALID if no type satisfying criteria
+ * was found.
+ */
+telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name);
+
 #ifdef __cplusplus
 }
 #endif

@@ -126,7 +126,6 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
     wifi_init();
-    ESP_ERROR_CHECK(nvs_flash_init());
 
     astarte_device_handle_t astarte_device = astarte_init();
 
@@ -138,10 +137,22 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
         EDGEHOG_EVENTS, ESP_EVENT_ANY_ID, event_handler, NULL, NULL));
 
-    edgehog_device_config_t edgehog_conf
-        = { .astarte_device = astarte_device, .partition_label = "nvs" };
+    edgehog_device_telemetry_config_t telemetry_config
+        = { .type = EDGEHOG_TELEMETRY_SYSTEM_STATUS, .period_seconds = 5 };
+
+    edgehog_device_config_t edgehog_conf = { .astarte_device = astarte_device,
+        .partition_label = "nvs",
+        .telemetry_config = &telemetry_config,
+        .telemetry_config_len = 1 };
     edgehog_device = edgehog_device_new(&edgehog_conf);
+
+    if (!edgehog_device) {
+        ESP_LOGE(TAG, "Failed to create Edgehog device");
+        return;
+    }
 
     edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
     edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");
+
+    edgehog_device_start(edgehog_device);
 }
