@@ -149,10 +149,7 @@ end:
 edgehog_err_t edgehog_ota_event(edgehog_device_handle_t edgehog_device,
     astarte_device_handle_t astarte_device, astarte_device_data_event_t *event_request)
 {
-    if (event_request->bson_value_type != BSON_TYPE_DOCUMENT) {
-        ESP_LOGE(TAG, "Unable to handle ota request, type not supported");
-        return EDGEHOG_ERR;
-    }
+    EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_DOCUMENT);
 
     uint8_t type;
     size_t str_value_len;
