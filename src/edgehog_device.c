@@ -23,6 +23,7 @@
 #if CONFIG_INDICATOR_GPIO_ENABLE
 #include "edgehog_led.h"
 #endif
+#include "edgehog_os_bundle.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
 #include "esp_system.h"
@@ -183,6 +184,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
 #if CONFIG_INDICATOR_GPIO_ENABLE
     edgehog_device->led_manager = edgehog_led_behavior_manager_new();
 #endif
+    edgehog_os_bundle_data_publish(edgehog_device->astarte_device);
     return edgehog_device;
 }
 
@@ -264,6 +266,13 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             os_info_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &os_bundle_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            os_bundle_interface.name, ret);
         return ESP_FAIL;
     }
 
