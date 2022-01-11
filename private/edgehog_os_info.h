@@ -23,9 +23,9 @@
 extern "C" {
 #endif
 
-#include <astarte_device.h>
+#include "edgehog_device.h"
 
 extern const astarte_interface_t os_info_interface;
 
-void edgehog_device_publish_os_info(astarte_device_handle_t astarte_device);
+void edgehog_device_publish_os_info(edgehog_device_handle_t edgehog_device);
 #endif // EDGEHOG_OS_INFO_H

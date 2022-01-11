@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#include "astarte_device.h"
+#include "edgehog_device.h"
 
 extern const astarte_interface_t storage_usage_interface;
 
@@ -33,10 +33,10 @@ extern const astarte_interface_t storage_usage_interface;
  * @details This function fetches and publishes storage usage info
  * on Astarte.
  *
- * @param astarte_device A valid Astarte device handle.
+ * @param edgehog_device A valid Edgehog device handle.
  */
 
-void edgehog_storage_usage_publish(astarte_device_handle_t astarte_device);
+void edgehog_storage_usage_publish(edgehog_device_handle_t edgehog_device);
 
 #ifdef __cplusplus
 }

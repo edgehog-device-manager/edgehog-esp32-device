@@ -17,6 +17,7 @@
  */
 
 #include "edgehog_storage_usage.h"
+#include "edgehog_device_private.h"
 #include <astarte_bson_serializer.h>
 #include <esp_log.h>
 #include <esp_partition.h>
@@ -37,7 +38,7 @@ const astarte_interface_t storage_usage_interface
 static void publish_storage_usage(
     astarte_device_handle_t astarte_device, const char *label, long free, long total);
 
-void edgehog_storage_usage_publish(astarte_device_handle_t astarte_device)
+void edgehog_storage_usage_publish(edgehog_device_handle_t edgehog_device)
 {
     esp_partition_iterator_t partition_iterator
         = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, NULL);
@@ -48,7 +49,7 @@ void edgehog_storage_usage_publish(astarte_device_handle_t astarte_device)
             nvs_stats_t nvs_stats;
             esp_err_t result = nvs_get_stats(partition_info->label, &nvs_stats);
             if (result == ESP_OK) {
-                publish_storage_usage(astarte_device, partition_info->label,
+                publish_storage_usage(edgehog_device->astarte_device, partition_info->label,
                     nvs_stats.free_entries * NVS_ENTRY_SIZE_BYTES,
                     nvs_stats.total_entries * NVS_ENTRY_SIZE_BYTES);
             }

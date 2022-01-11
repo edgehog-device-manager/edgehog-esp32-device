@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#include "astarte_device.h"
+#include "edgehog_device.h"
 
 // clang-format off
 
@@ -52,14 +52,14 @@ extern const astarte_interface_t battery_status_interface;
  * @details This function publishes battery status info
  * to Astarte.
  *
- * @param astarte_device A valid Astarte device handle.
+ * @param edgehog_device A valid Edgehog device handle.
  * @param battery_slot Battery slot name.
  * @param level_percentage Charge level in [0.0%-100.0%] range, such as 89.0%.
  * @param level_absolute_error The level measurement absolute error in [0.0-100.0] range
  * @param state Any value of edgehog_battery_state such as `BATTERY_CHARGING`
  *
  */
-void edgehog_battery_status_publish(astarte_device_handle_t astarte_device,
+void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device,
     const char *battery_slot, double level_percentage, double level_absolute_error,
     edgehog_battery_state state);
 

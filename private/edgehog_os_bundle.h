@@ -18,7 +18,7 @@
 
 #ifndef EDGEHOG_OS_IMAGE_H
 #define EDGEHOG_OS_IMAGE_H
-#include <astarte_device.h>
+#include <edgehog_device.h>
 #include <esp_err.h>
 
 extern const astarte_interface_t os_bundle_interface;
@@ -27,8 +27,8 @@ extern const astarte_interface_t os_bundle_interface;
  * @brief Publish OS Image data
  *
  * @details This function fetches and publishes Firmware-specific data
- * @param astarte_device A valid Astarte device handle.
+ * @param edgehog_device A valid Edgehog device handle.
  */
-void edgehog_os_bundle_data_publish(astarte_device_handle_t astarte_device);
+void edgehog_os_bundle_data_publish(edgehog_device_handle_t edgehog_device);
 
 #endif // EDGEHOG_OS_IMAGE_H
