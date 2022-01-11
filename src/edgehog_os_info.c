@@ -31,7 +31,6 @@ const astarte_interface_t os_info_interface = { .name = "io.edgehog.devicemanage
 
 void edgehog_device_publish_os_info(astarte_device_handle_t astarte_device)
 {
-    const esp_app_desc_t *app_info = esp_ota_get_app_description();
     esp_err_t ret = astarte_device_set_string_property(
         astarte_device, os_info_interface.name, "/osName", "esp-idf");
     if (ret != ASTARTE_OK) {
