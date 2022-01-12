@@ -588,6 +588,8 @@ telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
             return scan_wifi_ap;
         case EDGEHOG_TELEMETRY_SYSTEM_STATUS:
             return publish_system_status;
+        case EDGEHOG_TELEMETRY_STORAGE_USAGE:
+            return edgehog_storage_usage_publish;
         default:
             return NULL;
     }
@@ -601,6 +603,8 @@ telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
         return EDGEHOG_TELEMETRY_WIFI_SCAN;
     } else if (strcmp(interface_name, system_status_status_interface.name) == 0) {
         return EDGEHOG_TELEMETRY_SYSTEM_STATUS;
+    } else if (strcmp(interface_name, storage_usage_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_STORAGE_USAGE;
     } else {
         return EDGEHOG_TELEMETRY_INVALID;
     }

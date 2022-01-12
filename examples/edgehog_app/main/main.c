@@ -138,7 +138,7 @@ void app_main(void)
         EDGEHOG_EVENTS, ESP_EVENT_ANY_ID, event_handler, NULL, NULL));
 
     edgehog_device_telemetry_config_t telemetry_config
-        = { .type = EDGEHOG_TELEMETRY_SYSTEM_STATUS, .period_seconds = 5 };
+        = { .type = EDGEHOG_TELEMETRY_SYSTEM_STATUS, .period_seconds = 3600 };
 
     edgehog_device_config_t edgehog_conf = { .astarte_device = astarte_device,
         .partition_label = "nvs",
