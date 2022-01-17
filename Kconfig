@@ -1,0 +1,14 @@
+menu "Edgehog SDK"
+
+config INDICATOR_GPIO_ENABLE
+    bool "Activate Indicator LED GPIO"
+    default false
+    help
+        Set to true if a LED that can be used as an indicator is present.
+
+config INDICATOR_GPIO
+    int "Indicator LED GPIO"
+    depends on INDICATOR_GPIO_ENABLE
+    help
+        The GPIO number of the LED intended to be used as indicator.
+endmenu

@@ -5,6 +5,10 @@ set(edgehog_srcs "src/edgehog_device.c"
         "src/edgehog_command.c"
         "src/edgehog_os_info.c")
 
+if (${CONFIG_INDICATOR_GPIO_ENABLE})
+    set(edgehog_srcs ${edgehog_srcs} "src/edgehog_led.c")
+endif ()
+
 idf_component_register(SRCS "${edgehog_srcs}"
         INCLUDE_DIRS "include"
         PRIV_INCLUDE_DIRS "private"

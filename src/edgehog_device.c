@@ -20,6 +20,9 @@
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
 #include "edgehog_os_info.h"
+#if CONFIG_INDICATOR_GPIO_ENABLE
+#include "edgehog_led.h"
+#endif
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
 #include "esp_system.h"
@@ -44,6 +47,9 @@ struct edgehog_device_t
     char boot_id[ASTARTE_UUID_LEN];
     astarte_device_handle_t astarte_device;
     const char *partition_name;
+#if CONFIG_INDICATOR_GPIO_ENABLE
+    edgehog_led_behavior_manager_handle_t led_manager;
+#endif
 };
 
 const static astarte_interface_t hardware_info_interface
@@ -126,6 +132,16 @@ void edgehog_device_astarte_event_handler(
             ESP_LOGE(TAG, "Unable to handle command request");
         }
     }
+#if CONFIG_INDICATOR_GPIO_ENABLE
+    if (strcmp(event->interface_name, led_request_interface.name) == 0) {
+        ESP_LOGI(TAG, "Incoming request for led behavior");
+        edgehog_err_t led_behavior_result
+            = edgehog_led_behavior_event(edgehog_device->led_manager, event);
+        if (led_behavior_result != EDGEHOG_OK) {
+            ESP_LOGE(TAG, "Unable to set led behavior");
+        }
+    }
+#endif
 }
 
 edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
@@ -164,6 +180,9 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     scan_wifi_ap(edgehog_device);
     edgehog_storage_usage_publish(edgehog_device->astarte_device);
     edgehog_device_publish_os_info(edgehog_device->astarte_device);
+#if CONFIG_INDICATOR_GPIO_ENABLE
+    edgehog_device->led_manager = edgehog_led_behavior_manager_new();
+#endif
     return edgehog_device;
 }
 
@@ -232,6 +251,14 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
             commands_interface.name, ret);
         return ESP_FAIL;
     }
+#if CONFIG_INDICATOR_GPIO_ENABLE
+    ret = astarte_device_add_interface(device, &led_request_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            led_request_interface.name, ret);
+        return ESP_FAIL;
+    }
+#endif
 
     ret = astarte_device_add_interface(device, &os_info_interface);
     if (ret != ASTARTE_OK) {
