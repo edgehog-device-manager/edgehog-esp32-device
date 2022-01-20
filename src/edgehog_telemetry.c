@@ -44,7 +44,7 @@
 #define TELEMETRY_NAMESPACE "ehgd_tlm"
 
 // The telemetry update array length, increment this when add item to telemetry_type_t
-#define TELEMETRY_TASK_PARAM_LEN 3
+#define TELEMETRY_TASK_PARAM_LEN 4
 #define TELEMETRY_UPDATE_DEFAULT 0
 #define TELEMETRY_UPDATE_DISABLED -1
 #define TELEMETRY_UPDATE_ENABLED 1

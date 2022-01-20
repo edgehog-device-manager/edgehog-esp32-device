@@ -41,7 +41,8 @@ typedef enum
     EDGEHOG_TELEMETRY_INVALID = 0, /**< The telemetry type is invalid. */
     EDGEHOG_TELEMETRY_HW_INFO = 1, /**< The hardware info telemetry type. */
     EDGEHOG_TELEMETRY_WIFI_SCAN = 2, /**< The wifi scan telemetry type. */
-    EDGEHOG_TELEMETRY_SYSTEM_STATUS = 3 /**< The system status telemetry type. */
+    EDGEHOG_TELEMETRY_SYSTEM_STATUS = 3, /**< The system status telemetry type. */
+    EDGEHOG_TELEMETRY_STORAGE_USAGE = 4 /**< The storage usage telemetry type. */
 } telemetry_type_t;
 
 /**
