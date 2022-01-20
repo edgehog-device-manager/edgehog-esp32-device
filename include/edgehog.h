@@ -39,6 +39,7 @@ typedef enum
     EDGEHOG_ERR_OTA_DEPLOY = 6, /**< An error occurred during OTA Deploy procedure */
     EDGEHOG_ERR_OTA_WRONG_PARTITION = 7, /**< The OTA procedure boot on the wrong partition */
     EDGEHOG_ERR_TASK_CREATE = 8, /**< xTaskCreate was unable to spawn a new task */
+    EDGEHOG_ERR_DEVICE_NOT_READY = 9, /**< Tried to perform an operation on a Device in a non-ready or initialized state */
 }edgehog_err_t;
 
 // clang-format on
