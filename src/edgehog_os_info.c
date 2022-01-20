@@ -17,9 +17,9 @@
  */
 
 #include "edgehog_os_info.h"
+#include "edgehog_device_private.h"
 #include <esp_idf_version.h>
 #include <esp_log.h>
-#include <esp_ota_ops.h>
 
 #define TAG "EDGEHOG_OS_INFO"
 
@@ -29,8 +29,9 @@ const astarte_interface_t os_info_interface = { .name = "io.edgehog.devicemanage
     .ownership = OWNERSHIP_DEVICE,
     .type = TYPE_PROPERTIES };
 
-void edgehog_device_publish_os_info(astarte_device_handle_t astarte_device)
+void edgehog_device_publish_os_info(edgehog_device_handle_t edgehog_device)
 {
+    astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
     esp_err_t ret = astarte_device_set_string_property(
         astarte_device, os_info_interface.name, "/osName", "esp-idf");
     if (ret != ASTARTE_OK) {

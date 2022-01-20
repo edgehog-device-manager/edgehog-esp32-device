@@ -66,8 +66,8 @@ static void publish_ota_data(astarte_device_handle_t astarte_device, const char 
 /**
  * This function is blocking, the calling task will be blocked until the OTA procedure completes.
  */
-static edgehog_err_t do_ota(edgehog_device_handle_t edgehog_device,
-    astarte_device_handle_t astarte_device, const char *request_uuid, const char *ota_url);
+static edgehog_err_t do_ota(
+    edgehog_device_handle_t edgehog_device, const char *request_uuid, const char *ota_url);
 static void ota_state_reboot(nvs_handle handle);
 static void ota_state_failed(astarte_device_handle_t astarte_device, nvs_handle handle,
     const char *request_uuid, edgehog_err_t ota_result);
@@ -100,8 +100,7 @@ static esp_err_t http_ota_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void edgehog_ota_init(
-    edgehog_device_handle_t edgehog_device, astarte_device_handle_t astarte_device)
+void edgehog_ota_init(edgehog_device_handle_t edgehog_device)
 {
     nvs_handle_t handle;
     esp_err_t result = edgehog_device_nvs_open(edgehog_device, OTA_NAMESPACE, &handle);
@@ -122,6 +121,7 @@ void edgehog_ota_init(
     uint8_t ota_state = OTA_IDLE;
     result = nvs_get_u8(handle, OTA_STATE_KEY, &ota_state);
 
+    astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
     if (result != ESP_OK || ota_state != OTA_REBOOT) {
         nvs_set_u8(handle, OTA_STATE_KEY, OTA_FAILED);
         nvs_commit(handle);
@@ -146,8 +146,8 @@ end:
 }
 
 // Beware this function blocks the caller until OTA is completed.
-edgehog_err_t edgehog_ota_event(edgehog_device_handle_t edgehog_device,
-    astarte_device_handle_t astarte_device, astarte_device_data_event_t *event_request)
+edgehog_err_t edgehog_ota_event(
+    edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event_request)
 {
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_DOCUMENT);
 
@@ -169,18 +169,19 @@ edgehog_err_t edgehog_ota_event(edgehog_device_handle_t edgehog_device,
     }
 
     // Beware this function blocks the caller until OTA is completed.
-    return do_ota(edgehog_device, astarte_device, request_uuid, ota_url);
+    return do_ota(edgehog_device, request_uuid, ota_url);
 }
 
 // TODO: make this function async using advanced_esp_ota instead of esp_https_ota
-static edgehog_err_t do_ota(edgehog_device_handle_t edgehog_device,
-    astarte_device_handle_t astarte_device, const char *request_uuid, const char *ota_url)
+static edgehog_err_t do_ota(
+    edgehog_device_handle_t edgehog_device, const char *request_uuid, const char *ota_url)
 {
     ESP_LOGI(TAG, "INIT");
     esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_INIT_EVENT, NULL, 0, 0);
 
     nvs_handle_t handle;
     esp_err_t esp_ret = edgehog_device_nvs_open(edgehog_device, OTA_NAMESPACE, &handle);
+    astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
 
     if (esp_ret != ESP_OK && esp_ret != ESP_ERR_NOT_FOUND) {
         ESP_LOGE(TAG, "Unable to open NVS to save ota state, ota cancelled");

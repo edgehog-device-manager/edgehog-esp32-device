@@ -17,9 +17,9 @@
  */
 
 #include "edgehog_os_bundle.h"
+#include "edgehog_device_private.h"
 #include <esp_log.h>
 #include <esp_ota_ops.h>
-#include <string.h>
 #ifdef BUILD_DATE_TIME
 
 #define BUILD_ID BUILD_DATE_TIME
@@ -35,9 +35,10 @@ const astarte_interface_t os_bundle_interface = { .name = "io.edgehog.devicemana
     .ownership = OWNERSHIP_DEVICE,
     .type = TYPE_PROPERTIES };
 
-void edgehog_os_bundle_data_publish(astarte_device_handle_t astarte_device)
+void edgehog_os_bundle_data_publish(edgehog_device_handle_t edgehog_device)
 {
     const esp_app_desc_t *desc = esp_ota_get_app_description();
+    astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
 
     astarte_err_t ret = astarte_device_set_string_property(
         astarte_device, os_bundle_interface.name, "/name", desc->project_name);

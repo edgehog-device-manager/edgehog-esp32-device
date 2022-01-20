@@ -35,11 +35,9 @@ extern const astarte_interface_t ota_response_interface;
  * if there is any pending OTA it completes it.
  *
  * @param edgehog_device A valid Edgehog device handle.
- * @param astarte_device A valid Astarte device handle.
  */
 
-void edgehog_ota_init(
-    edgehog_device_handle_t edgehog_device, astarte_device_handle_t astarte_device);
+void edgehog_ota_init(edgehog_device_handle_t edgehog_device);
 
 /**
  * @brief receive Edgehog device OTA.
@@ -49,14 +47,13 @@ void edgehog_ota_init(
  * task will be blocked until the OTA procedure completes.
  *
  * @param edgehog_device A valid Edgehog device handle.
- * @param astarte_device A valid Astarte device handle.
  * @param event_request A valid Astarte device data event.
  *
  * @return EDGEHOG_OK if the OTA event is handled successfully, an edgehog_err_t otherwise.
  */
 
-edgehog_err_t edgehog_ota_event(edgehog_device_handle_t edgehog_device,
-    astarte_device_handle_t astarte_device, astarte_device_data_event_t *event_request);
+edgehog_err_t edgehog_ota_event(
+    edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event_request);
 
 #ifdef __cplusplus
 }

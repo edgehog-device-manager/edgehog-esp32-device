@@ -24,6 +24,21 @@ extern "C" {
 #endif
 
 #include "edgehog_device.h"
+#include "edgehog_telemetry.h"
+#if CONFIG_INDICATOR_GPIO_ENABLE
+#include "edgehog_led.h"
+#endif
+
+struct edgehog_device_t
+{
+    char boot_id[ASTARTE_UUID_LEN];
+    astarte_device_handle_t astarte_device;
+    const char *partition_name;
+#if CONFIG_INDICATOR_GPIO_ENABLE
+    edgehog_led_behavior_manager_handle_t led_manager;
+#endif
+    edgehog_telemetry_t *edgehog_telemetry;
+};
 
 /**
  * @brief open the Edgehog non-volatile storage with a given namespace.

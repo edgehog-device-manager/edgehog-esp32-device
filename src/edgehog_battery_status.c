@@ -17,6 +17,7 @@
  */
 
 #include "edgehog_battery_status.h"
+#include "edgehog_device_private.h"
 #include <astarte_bson_serializer.h>
 #include <esp_log.h>
 #include <stdio.h>
@@ -33,7 +34,7 @@ const astarte_interface_t battery_status_interface
 static const char *edgehog_battery_to_code(edgehog_battery_state state);
 static double normalize_error_level(double level);
 
-void edgehog_battery_status_publish(astarte_device_handle_t astarte_device,
+void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device,
     const char *battery_slot, double level_percentage, double level_absolute_error,
     edgehog_battery_state battery_state)
 {
@@ -57,7 +58,8 @@ void edgehog_battery_status_publish(astarte_device_handle_t astarte_device,
 
     int doc_len;
     const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
-    astarte_device_stream_aggregate(astarte_device, battery_status_interface.name, path, doc, 0);
+    astarte_device_stream_aggregate(
+        edgehog_device->astarte_device, battery_status_interface.name, path, doc, 0);
     astarte_bson_serializer_destroy(&bs);
     free(path);
 }

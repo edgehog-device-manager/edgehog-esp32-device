@@ -19,14 +19,10 @@
 #include "edgehog_battery_status.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
-#include "edgehog_os_info.h"
-#if CONFIG_INDICATOR_GPIO_ENABLE
-#include "edgehog_led.h"
-#endif
 #include "edgehog_os_bundle.h"
+#include "edgehog_os_info.h"
 #include "edgehog_ota.h"
 #include "edgehog_storage_usage.h"
-#include "edgehog_telemetry.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
 #include <esp_err.h>
@@ -43,17 +39,6 @@
 #define APPLIANCE_NAMESPACE "eh_appliance"
 
 static const char *TAG = "EDGEHOG";
-
-struct edgehog_device_t
-{
-    char boot_id[ASTARTE_UUID_LEN];
-    astarte_device_handle_t astarte_device;
-    const char *partition_name;
-#if CONFIG_INDICATOR_GPIO_ENABLE
-    edgehog_led_behavior_manager_handle_t led_manager;
-#endif
-    edgehog_telemetry_t *edgehog_telemetry;
-};
 
 const static astarte_interface_t hardware_info_interface
     = { .name = "io.edgehog.devicemanager.HardwareInfo",
@@ -122,8 +107,7 @@ void edgehog_device_astarte_event_handler(
 
     if (strcmp(event->interface_name, ota_request_interface.name) == 0) {
         // Beware this function blocks the caller until OTA is completed.
-        edgehog_err_t ota_result
-            = edgehog_ota_event(edgehog_device, edgehog_device->astarte_device, event);
+        edgehog_err_t ota_result = edgehog_ota_event(edgehog_device, event);
         if (ota_result == EDGEHOG_OK) {
             ESP_LOGI(TAG, "OTA Deploy end successfully, device restart in 5 seconds");
             vTaskDelay(pdMS_TO_TICKS(5000));
@@ -183,16 +167,16 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     }
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
-    edgehog_ota_init(edgehog_device, config->astarte_device);
+    edgehog_ota_init(edgehog_device);
     publish_device_hardware_info(edgehog_device);
     publish_system_status(edgehog_device);
     scan_wifi_ap(edgehog_device);
-    edgehog_storage_usage_publish(edgehog_device->astarte_device);
-    edgehog_device_publish_os_info(edgehog_device->astarte_device);
+    edgehog_storage_usage_publish(edgehog_device);
+    edgehog_device_publish_os_info(edgehog_device);
 #if CONFIG_INDICATOR_GPIO_ENABLE
     edgehog_device->led_manager = edgehog_led_behavior_manager_new();
 #endif
-    edgehog_os_bundle_data_publish(edgehog_device->astarte_device);
+    edgehog_os_bundle_data_publish(edgehog_device);
     edgehog_telemetry_t *edgehog_telemetry
         = edgehog_telemetry_new(config->telemetry_config, config->telemetry_config_len);
     if (!edgehog_telemetry) {
