@@ -22,6 +22,7 @@
 #include "edgehog_os_bundle.h"
 #include "edgehog_os_info.h"
 #include "edgehog_ota.h"
+#include "edgehog_runtime_info.h"
 #include "edgehog_storage_usage.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
@@ -185,6 +186,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     }
     edgehog_device->edgehog_telemetry = edgehog_telemetry;
 
+    edgehog_runtime_info_publish(edgehog_device);
     return edgehog_device;
 
 error:
@@ -294,6 +296,13 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             os_bundle_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &runtime_info_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            runtime_info_interface.name, ret);
         return ESP_FAIL;
     }
 
