@@ -4,7 +4,7 @@ set(edgehog_srcs "src/edgehog_device.c"
         "src/edgehog_battery_status.c"
         "src/edgehog_command.c"
         "src/edgehog_os_info.c"
-        "src/edgehog_os_bundle.c"
+        "src/edgehog_base_image.c"
         "src/edgehog_telemetry.c"
         "src/edgehog_runtime_info.c")
 
