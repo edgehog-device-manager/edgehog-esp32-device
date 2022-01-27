@@ -151,8 +151,8 @@ void app_main(void)
         return;
     }
 
-    edgehog_device_set_appliance_serial_number(edgehog_device, "serial_number_1");
-    edgehog_device_set_appliance_part_number(edgehog_device, "part_number_1");
+    edgehog_device_set_system_serial_number(edgehog_device, "serial_number_1");
+    edgehog_device_set_system_part_number(edgehog_device, "part_number_1");
 
     edgehog_device_start(edgehog_device);
 }

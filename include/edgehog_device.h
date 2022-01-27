@@ -107,27 +107,27 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config);
 void edgehog_device_destroy(edgehog_device_handle_t edgehog_device);
 
 /**
- * @brief set the appliance serial number
+ * @brief set the system serial number
  *
- * @details This function sends the appliance serial number on Astarte and stores it on the nvs.
+ * @details This function sends the system serial number on Astarte and stores it on the nvs.
  *
  * @param edgehog_device A valid Edgehog device handle.
  * @param serial_num The serial number to be stored
  * @return ESP_OK if the data was successfully stored and sent, an esp_err_t otherwise.
  */
-esp_err_t edgehog_device_set_appliance_serial_number(
+esp_err_t edgehog_device_set_system_serial_number(
     edgehog_device_handle_t edgehog_device, const char *serial_num);
 
 /**
- * @brief set the appliance part number
+ * @brief set the system part number
  *
- * @details This function sends the appliance part number on Astarte and stores it on the nvs.
+ * @details This function sends the system part number on Astarte and stores it on the nvs.
  *
  * @param edgehog_device A valid Edgehog device handle.
  * @param part_num The part number to be stored
  * @return ESP_OK if the data was successfully stored and sent, an esp_err_t otherwise.
  */
-esp_err_t edgehog_device_set_appliance_part_number(
+esp_err_t edgehog_device_set_system_part_number(
     edgehog_device_handle_t edgehog_device, const char *part_num);
 
 /**
