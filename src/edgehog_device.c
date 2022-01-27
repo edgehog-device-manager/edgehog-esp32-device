@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
+#include "edgehog_base_image.h"
 #include "edgehog_battery_status.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
-#include "edgehog_os_bundle.h"
 #include "edgehog_os_info.h"
 #include "edgehog_ota.h"
 #include "edgehog_runtime_info.h"
@@ -177,7 +177,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
 #if CONFIG_INDICATOR_GPIO_ENABLE
     edgehog_device->led_manager = edgehog_led_behavior_manager_new();
 #endif
-    edgehog_os_bundle_data_publish(edgehog_device);
+    edgehog_base_image_data_publish(edgehog_device);
     edgehog_telemetry_t *edgehog_telemetry
         = edgehog_telemetry_new(config->telemetry_config, config->telemetry_config_len);
     if (!edgehog_telemetry) {
@@ -292,10 +292,10 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
         return ESP_FAIL;
     }
 
-    ret = astarte_device_add_interface(device, &os_bundle_interface);
+    ret = astarte_device_add_interface(device, &base_image_interface);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            os_bundle_interface.name, ret);
+            base_image_interface.name, ret);
         return ESP_FAIL;
     }
 

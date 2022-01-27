@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "edgehog_os_bundle.h"
+#include "edgehog_base_image.h"
 #include "edgehog_device_private.h"
 #include <esp_log.h>
 #include <esp_ota_ops.h>
@@ -27,35 +27,35 @@
 #define BUILD_ID ""
 #endif
 
-static const char *TAG = "EDGEHOG_OS_IMAGE";
+static const char *TAG = "EDGEHOG_BASE_IMAGE";
 
-const astarte_interface_t os_bundle_interface = { .name = "io.edgehog.devicemanager.OSBundle",
+const astarte_interface_t base_image_interface = { .name = "io.edgehog.devicemanager.BaseImage",
     .major_version = 0,
     .minor_version = 1,
     .ownership = OWNERSHIP_DEVICE,
     .type = TYPE_PROPERTIES };
 
-void edgehog_os_bundle_data_publish(edgehog_device_handle_t edgehog_device)
+void edgehog_base_image_data_publish(edgehog_device_handle_t edgehog_device)
 {
     const esp_app_desc_t *desc = esp_ota_get_app_description();
     astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
 
     astarte_err_t ret = astarte_device_set_string_property(
-        astarte_device, os_bundle_interface.name, "/name", desc->project_name);
+        astarte_device, base_image_interface.name, "/name", desc->project_name);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to publish os image name");
         return;
     }
 
     ret = astarte_device_set_string_property(
-        astarte_device, os_bundle_interface.name, "/version", desc->version);
+        astarte_device, base_image_interface.name, "/version", desc->version);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to publish os image version");
         return;
     }
 
     ret = astarte_device_set_string_property(
-        astarte_device, os_bundle_interface.name, "/buildId", BUILD_ID);
+        astarte_device, base_image_interface.name, "/buildId", BUILD_ID);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to publish os image build id");
         return;
@@ -64,7 +64,7 @@ void edgehog_os_bundle_data_publish(edgehog_device_handle_t edgehog_device)
     char sha256_str[65];
     esp_ota_get_app_elf_sha256(sha256_str, 65);
     ret = astarte_device_set_string_property(
-        astarte_device, os_bundle_interface.name, "/fingerprint", sha256_str);
+        astarte_device, base_image_interface.name, "/fingerprint", sha256_str);
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to publish os image hash");
     }

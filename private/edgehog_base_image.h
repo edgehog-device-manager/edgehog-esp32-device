@@ -21,14 +21,14 @@
 #include <edgehog_device.h>
 #include <esp_err.h>
 
-extern const astarte_interface_t os_bundle_interface;
+extern const astarte_interface_t base_image_interface;
 
 /**
- * @brief Publish OS Image data
+ * @brief Publish Base Image data
  *
  * @details This function fetches and publishes Firmware-specific data
  * @param edgehog_device A valid Edgehog device handle.
  */
-void edgehog_os_bundle_data_publish(edgehog_device_handle_t edgehog_device);
+void edgehog_base_image_data_publish(edgehog_device_handle_t edgehog_device);
 
 #endif // EDGEHOG_OS_IMAGE_H
