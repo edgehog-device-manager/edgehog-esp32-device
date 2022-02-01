@@ -18,6 +18,7 @@
 
 #include "edgehog_base_image.h"
 #include "edgehog_battery_status.h"
+#include "edgehog_cellular_connection.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
 #include "edgehog_os_info.h"
@@ -303,6 +304,20 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
     if (ret != ASTARTE_OK) {
         ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
             runtime_info_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &cellular_connection_properties_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            cellular_connection_properties_interface.name, ret);
+        return ESP_FAIL;
+    }
+
+    ret = astarte_device_add_interface(device, &cellular_connection_status_interface);
+    if (ret != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+            cellular_connection_status_interface.name, ret);
         return ESP_FAIL;
     }
 
