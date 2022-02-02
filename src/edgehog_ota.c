@@ -111,7 +111,7 @@ void edgehog_ota_init(edgehog_device_handle_t edgehog_device)
     }
 
     char req_uuid[ASTARTE_UUID_LEN];
-    size_t req_uuid_size = sizeof(ASTARTE_UUID_LEN);
+    size_t req_uuid_size = ASTARTE_UUID_LEN;
     result = nvs_get_str(handle, OTA_REQUEST_ID_KEY, req_uuid, &req_uuid_size);
 
     if (result != ESP_OK) {
