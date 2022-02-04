@@ -173,7 +173,6 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     edgehog_ota_init(edgehog_device);
     publish_device_hardware_info(edgehog_device);
     publish_system_status(edgehog_device);
-    scan_wifi_ap(edgehog_device);
     edgehog_storage_usage_publish(edgehog_device);
     edgehog_device_publish_os_info(edgehog_device);
 #if CONFIG_INDICATOR_GPIO_ENABLE
@@ -189,6 +188,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     edgehog_device->edgehog_telemetry = edgehog_telemetry;
 
     edgehog_runtime_info_publish(edgehog_device);
+    scan_wifi_ap(edgehog_device);
     return edgehog_device;
 
 error:
