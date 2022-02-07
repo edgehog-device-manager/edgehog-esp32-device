@@ -355,10 +355,12 @@ static void publish_device_hardware_info(edgehog_device_handle_t edgehog_device)
             cpu_model = "ESP32-S2";
             cpu_model_name = "Single-core Xtensa LX7";
             break;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
         case CHIP_ESP32S3:
             cpu_model = "ESP32-S3";
             cpu_model_name = "Dual-core Xtensa LX7";
             break;
+#endif
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 1)
         case CHIP_ESP32C3:
             cpu_model = "ESP32-C3";
