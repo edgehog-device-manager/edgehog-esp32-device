@@ -209,123 +209,36 @@ edgehog_err_t edgehog_device_start(edgehog_device_handle_t edgehog_device)
 
 esp_err_t add_interfaces(astarte_device_handle_t device)
 {
-    astarte_err_t ret;
-
-    ret = astarte_device_add_interface(device, &hardware_info_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            hardware_info_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &system_status_status_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            system_status_status_interface.name, ret);
-    }
-
-    ret = astarte_device_add_interface(device, &wifi_scan_result_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            wifi_scan_result_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &system_info_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            system_info_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &ota_request_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            ota_request_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &ota_response_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            ota_response_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &storage_usage_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            storage_usage_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &battery_status_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            battery_status_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &commands_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            commands_interface.name, ret);
-        return ESP_FAIL;
-    }
+    const astarte_interface_t *const interfaces[]
+        = { &hardware_info_interface,
+              &system_status_status_interface,
+              &wifi_scan_result_interface,
+              &system_info_interface,
+              &ota_request_interface,
+              &ota_response_interface,
+              &storage_usage_interface,
+              &battery_status_interface,
+              &commands_interface,
 #if CONFIG_INDICATOR_GPIO_ENABLE
-    ret = astarte_device_add_interface(device, &led_request_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            led_request_interface.name, ret);
-        return ESP_FAIL;
-    }
+              &led_request_interface,
 #endif
+              &telemetry_config_interface,
+              &os_info_interface,
+              &base_image_interface,
+              &runtime_info_interface,
+              &cellular_connection_properties_interface,
+              &cellular_connection_status_interface,
+              &netif_interface };
 
-    ret = astarte_device_add_interface(device, &telemetry_config_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            telemetry_config_interface.name, ret);
-    }
+    int len = sizeof(interfaces) / sizeof(const astarte_interface_t *);
 
-    ret = astarte_device_add_interface(device, &os_info_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            os_info_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &base_image_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            base_image_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &runtime_info_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            runtime_info_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &cellular_connection_properties_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            cellular_connection_properties_interface.name, ret);
-        return ESP_FAIL;
-    }
-
-    ret = astarte_device_add_interface(device, &cellular_connection_status_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
-            cellular_connection_status_interface.name, ret);
-        return ESP_FAIL;
-    }
-    ret = astarte_device_add_interface(device, &netif_interface);
-    if (ret != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d", netif_interface.name,
-            ret);
-        return ESP_FAIL;
+    for (int i = 0; i < len; i++) {
+        astarte_err_t ret = astarte_device_add_interface(device, interfaces[i]);
+        if (ret != ASTARTE_OK) {
+            ESP_LOGE(TAG, "Unable to add Astarte Interface ( %s ) error code: %d",
+                interfaces[i]->name, ret);
+            return ESP_FAIL;
+        }
     }
 
     return ESP_OK;
