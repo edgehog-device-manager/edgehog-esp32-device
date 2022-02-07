@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog_cellular_connection.h
+ * @brief Edgehog device cellular connection API.
+ */
+
 #ifndef EDGEHOG_CELLULAR_CONNECTION_H
 #define EDGEHOG_CELLULAR_CONNECTION_H
 
