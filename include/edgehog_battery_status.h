@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog_battery_status.h
+ * @brief Edgehog device battery status API.
+ */
+
 #ifndef EDGEHOG_BATTERY_STATUS_H
 #define EDGEHOG_BATTERY_STATUS_H
 

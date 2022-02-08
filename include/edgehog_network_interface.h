@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog_network_interface.h
+ * @brief Edgehog device network interface API.
+ */
+
 #ifndef EDGEHOG_NETWORK_INTERFACE_H
 #define EDGEHOG_NETWORK_INTERFACE_H
 

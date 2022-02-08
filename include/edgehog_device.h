@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog_device.h
+ * @brief Edgehog device SDK API.
+ */
+
 #ifndef EDGEHOG_DEVICE_H
 #define EDGEHOG_DEVICE_H
 

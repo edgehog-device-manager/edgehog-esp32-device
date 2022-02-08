@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog.h
+ * @brief Edgehog types and defines.
+ */
+
 #ifndef EDGEHOG_H
 #define EDGEHOG_H
 

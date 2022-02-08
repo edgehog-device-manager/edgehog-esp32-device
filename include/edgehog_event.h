@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file edgehog_event.h
+ * Edgehog events definitions.
+ */
+
 #ifndef EDGEHOG_EVENT_H
 #define EDGEHOG_EVENT_H
 
