@@ -169,6 +169,8 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
         edgehog_device->partition_name = NVS_DEFAULT_PART_NAME;
     }
 
+    astarte_list_init(&edgehog_device->battery_list);
+
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
     edgehog_ota_init(edgehog_device);
     publish_device_hardware_info(edgehog_device);
@@ -499,6 +501,7 @@ void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
 {
     if (edgehog_device) {
         astarte_device_destroy(edgehog_device->astarte_device);
+        edgehog_battery_status_delete_list(&edgehog_device->battery_list);
         edgehog_telemetry_destroy(edgehog_device->edgehog_telemetry);
     }
 

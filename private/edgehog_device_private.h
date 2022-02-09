@@ -29,6 +29,8 @@ extern "C" {
 #include "edgehog_led.h"
 #endif
 
+#include <astarte_list.h>
+
 struct edgehog_device_t
 {
     char boot_id[ASTARTE_UUID_LEN];
@@ -38,6 +40,8 @@ struct edgehog_device_t
     edgehog_led_behavior_manager_handle_t led_manager;
 #endif
     edgehog_telemetry_t *edgehog_telemetry;
+
+    struct astarte_list_head_t battery_list;
 };
 
 /**

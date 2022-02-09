@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021 SECO Mind Srl
+ * Copyright 2021,2022 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ extern "C" {
 
 #include "edgehog_device.h"
 
+#include <astarte_list.h>
+
 // clang-format off
 
 /**
@@ -51,22 +53,32 @@ typedef enum
 
 extern const astarte_interface_t battery_status_interface;
 
+// Private API
+void edgehog_battery_status_delete_list(struct astarte_list_head_t *battery_list);
+
 /**
- * @brief publish Battery status info.
+ * @brief Update battery status info.
  *
- * @details This function publishes battery status info
- * to Astarte.
+ * @details This function updates battery status info. This function does not immediately publish
+ * the update.
  *
  * @param edgehog_device A valid Edgehog device handle.
  * @param battery_slot Battery slot name.
  * @param level_percentage Charge level in [0.0%-100.0%] range, such as 89.0%.
  * @param level_absolute_error The level measurement absolute error in [0.0-100.0] range
  * @param state Any value of edgehog_battery_state such as `BATTERY_CHARGING`
- *
  */
-void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device,
-    const char *battery_slot, double level_percentage, double level_absolute_error,
-    edgehog_battery_state state);
+void edgehog_battery_status_update(edgehog_device_handle_t edgehog_device, const char *battery_slot,
+    double level_percentage, double level_absolute_error, edgehog_battery_state state);
+
+/**
+ * @brief Publish battery status info.
+ *
+ * @details This function publishes to Astarte all available battery status updates.
+ *
+ * @param edgehog_device A valid Edgehog device handle.
+ */
+void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device);
 
 #ifdef __cplusplus
 }
