@@ -32,3 +32,22 @@ TEST_CASE("edgehog_device_telemetry_1", "create an edgehog_device_telemetry with
     edgehog_telemetry_destroy(edgehog_telemetry);
 }
 
+TEST_CASE("edgehog_device_telemetry_2", "create an edgehog_device_telemetry with empty telemetry")
+{
+    edgehog_device_telemetry_config_t telemetry_config= { };
+
+    edgehog_telemetry_t *edgehog_telemetry
+        = edgehog_telemetry_new(&telemetry_config, 0);
+    TEST_ASSERT(edgehog_telemetry)
+    TEST_ASSERT(edgehog_telemetry->telemetry_config_len == 0)
+    edgehog_telemetry_destroy(edgehog_telemetry);
+}
+
+TEST_CASE("edgehog_device_telemetry_3", "create an edgehog_device_telemetry with NULL")
+{
+    edgehog_telemetry_t *edgehog_telemetry
+        = edgehog_telemetry_new(NULL, 0);
+    TEST_ASSERT(edgehog_telemetry)
+    TEST_ASSERT(edgehog_telemetry->telemetry_config_len == 0)
+    edgehog_telemetry_destroy(edgehog_telemetry);
+}
