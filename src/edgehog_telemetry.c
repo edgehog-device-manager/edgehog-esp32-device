@@ -110,14 +110,16 @@ edgehog_telemetry_t *edgehog_telemetry_new(
 
     edgehog_telemetry->telemetry_config_len = telemetry_config_len;
 
-    edgehog_telemetry->telemetry_config = calloc(
-        edgehog_telemetry->telemetry_config_len, sizeof(edgehog_device_telemetry_config_t));
-    if (!edgehog_telemetry->telemetry_config) {
-        ESP_LOGE(TAG, "Out of memory %s: %d", __FILE__, __LINE__);
-        goto error;
+    if (edgehog_telemetry->telemetry_config_len > 0) {
+        edgehog_telemetry->telemetry_config = calloc(
+            edgehog_telemetry->telemetry_config_len, sizeof(edgehog_device_telemetry_config_t));
+        if (!edgehog_telemetry->telemetry_config) {
+            ESP_LOGE(TAG, "Out of memory %s: %d", __FILE__, __LINE__);
+            goto error;
+        }
+        memcpy(edgehog_telemetry->telemetry_config, telemetry_config,
+            telemetry_config_len * sizeof(edgehog_device_telemetry_config_t));
     }
-    memcpy(edgehog_telemetry->telemetry_config, telemetry_config,
-        telemetry_config_len * sizeof(edgehog_device_telemetry_config_t));
 
     astarte_list_init(&edgehog_telemetry->timer_list);
 
