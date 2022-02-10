@@ -538,6 +538,8 @@ telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
             return publish_system_status;
         case EDGEHOG_TELEMETRY_STORAGE_USAGE:
             return edgehog_storage_usage_publish;
+        case EDGEHOG_TELEMETRY_BATTERY_STATUS:
+            return edgehog_battery_status_publish;
         default:
             return NULL;
     }
@@ -553,6 +555,8 @@ telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
         return EDGEHOG_TELEMETRY_SYSTEM_STATUS;
     } else if (strcmp(interface_name, storage_usage_interface.name) == 0) {
         return EDGEHOG_TELEMETRY_STORAGE_USAGE;
+    } else if (strcmp(interface_name, battery_status_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_BATTERY_STATUS;
     } else {
         return EDGEHOG_TELEMETRY_INVALID;
     }
