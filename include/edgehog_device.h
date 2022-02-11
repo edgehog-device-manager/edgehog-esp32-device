@@ -56,7 +56,7 @@ typedef enum
  * Example:
  *  edgehog_device_telemetry_config_t telemetry_config =
  *  {
- *      .type = EDGEHOG_TL_WIFI_SCAN,
+ *      .type = EDGEHOG_TELEMETRY_WIFI_SCAN,
  *      .period_seconds = 5
  *   };
  */
