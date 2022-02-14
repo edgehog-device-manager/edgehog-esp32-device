@@ -92,18 +92,18 @@ static struct battery_status_t *get_battery_status(
     return status;
 }
 
-void edgehog_battery_status_update(edgehog_device_handle_t edgehog_device, const char *battery_slot,
-    double level_percentage, double level_absolute_error, edgehog_battery_state battery_state)
+void edgehog_battery_status_update(
+    edgehog_device_handle_t edgehog_device, const edgehog_battery_status_t *update)
 {
-    struct battery_status_t *status = get_battery_status(edgehog_device, battery_slot);
+    struct battery_status_t *status = get_battery_status(edgehog_device, update->battery_slot);
     if (!status) {
         ESP_LOGE(TAG, "Out of memory %s: %d", __FILE__, __LINE__);
         return;
     }
 
-    status->level_percentage = normalize_error_level(level_percentage);
-    status->level_absolute_error = normalize_error_level(level_absolute_error);
-    status->battery_state = battery_state;
+    status->level_percentage = normalize_error_level(update->level_percentage);
+    status->level_absolute_error = normalize_error_level(update->level_absolute_error);
+    status->battery_state = update->battery_state;
 }
 
 void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
