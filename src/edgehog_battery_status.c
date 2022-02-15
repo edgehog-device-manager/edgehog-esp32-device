@@ -21,6 +21,7 @@
 #include "edgehog_device_private.h"
 #include <astarte_bson_serializer.h>
 #include <esp_log.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 static const char *TAG = "EDGEHOG_BATTERY";
@@ -35,6 +36,7 @@ const astarte_interface_t battery_status_interface
 struct battery_status_t
 {
     struct astarte_list_head_t head;
+    bool updated;
     char *battery_slot;
     double level_percentage;
     double level_absolute_error;
@@ -81,7 +83,11 @@ static struct battery_status_t *get_battery_status(
             return NULL;
         }
 
+        status->updated = false;
         status->battery_slot = strdup(battery_slot);
+        status->level_percentage = 0;
+        status->level_absolute_error = 0;
+        status->battery_state = BATTERY_INVALID;
         if (!status->battery_slot) {
             free(status);
             return NULL;
@@ -102,9 +108,18 @@ void edgehog_battery_status_update(
         return;
     }
 
-    status->level_percentage = normalize_error_level(update->level_percentage);
-    status->level_absolute_error = normalize_error_level(update->level_absolute_error);
-    status->battery_state = update->battery_state;
+    double normal_level_percentage = normalize_error_level(update->level_percentage);
+    double normal_level_absolute_error = normalize_error_level(update->level_absolute_error);
+
+    if (!status->updated
+        && (status->level_percentage != normal_level_percentage
+            || status->level_absolute_error != normal_level_absolute_error
+            || status->battery_state != update->battery_state)) {
+        status->updated = true;
+        status->level_percentage = normal_level_percentage;
+        status->level_absolute_error = normal_level_absolute_error;
+        status->battery_state = update->battery_state;
+    }
 }
 
 void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
@@ -113,6 +128,10 @@ void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
     LIST_FOR_EACH(item, &edgehog_device->battery_list)
     {
         struct battery_status_t *battery = GET_LIST_ENTRY(item, struct battery_status_t, head);
+
+        if (!battery->updated) {
+            continue;
+        }
 
         struct astarte_bson_serializer_t bs;
         astarte_bson_serializer_init(&bs);
@@ -133,10 +152,14 @@ void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
 
         int doc_len;
         const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
-        astarte_device_stream_aggregate(
+        astarte_err_t res = astarte_device_stream_aggregate(
             edgehog_device->astarte_device, battery_status_interface.name, path, doc, 0);
         astarte_bson_serializer_destroy(&bs);
         free(path);
+
+        if (res == ASTARTE_OK) {
+            battery->updated = false;
+        }
     }
 }
 
