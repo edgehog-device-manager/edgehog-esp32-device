@@ -17,6 +17,7 @@
  */
 
 #include "edgehog_battery_status.h"
+#include "edgehog_battery_status_p.h"
 #include "edgehog_device_private.h"
 #include <astarte_bson_serializer.h>
 #include <esp_log.h>

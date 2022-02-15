@@ -18,6 +18,7 @@
 
 #include "edgehog_base_image.h"
 #include "edgehog_battery_status.h"
+#include "edgehog_battery_status_p.h"
 #include "edgehog_cellular_connection.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"

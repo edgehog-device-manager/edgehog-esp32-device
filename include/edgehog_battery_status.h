@@ -30,8 +30,6 @@ extern "C" {
 
 #include "edgehog_device.h"
 
-#include <astarte_list.h>
-
 // clang-format off
 
 /**
@@ -57,11 +55,6 @@ typedef struct {
 } edgehog_battery_status_t;
 
 // clang-format on
-
-extern const astarte_interface_t battery_status_interface;
-
-// Private API
-void edgehog_battery_status_delete_list(struct astarte_list_head_t *battery_list);
 
 /**
  * @brief Update battery status info.
