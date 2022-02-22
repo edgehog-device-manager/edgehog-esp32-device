@@ -18,6 +18,7 @@
 
 #include "edgehog_base_image.h"
 #include "edgehog_battery_status.h"
+#include "edgehog_battery_status_p.h"
 #include "edgehog_cellular_connection.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
@@ -168,6 +169,8 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     } else {
         edgehog_device->partition_name = NVS_DEFAULT_PART_NAME;
     }
+
+    astarte_list_init(&edgehog_device->battery_list);
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
     edgehog_ota_init(edgehog_device);
@@ -499,6 +502,7 @@ void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
 {
     if (edgehog_device) {
         astarte_device_destroy(edgehog_device->astarte_device);
+        edgehog_battery_status_delete_list(&edgehog_device->battery_list);
         edgehog_telemetry_destroy(edgehog_device->edgehog_telemetry);
     }
 
@@ -535,6 +539,8 @@ telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
             return publish_system_status;
         case EDGEHOG_TELEMETRY_STORAGE_USAGE:
             return edgehog_storage_usage_publish;
+        case EDGEHOG_TELEMETRY_BATTERY_STATUS:
+            return edgehog_battery_status_publish;
         default:
             return NULL;
     }
@@ -550,6 +556,8 @@ telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
         return EDGEHOG_TELEMETRY_SYSTEM_STATUS;
     } else if (strcmp(interface_name, storage_usage_interface.name) == 0) {
         return EDGEHOG_TELEMETRY_STORAGE_USAGE;
+    } else if (strcmp(interface_name, battery_status_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_BATTERY_STATUS;
     } else {
         return EDGEHOG_TELEMETRY_INVALID;
     }
