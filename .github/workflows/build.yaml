@@ -37,15 +37,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Checkout astarte-device-sdk
-        uses: actions/checkout@v2
-        with:
-          repository: astarte-platform/astarte-device-sdk-esp32
-          ref: release-1.0
-          path: ./examples/edgehog_app/components/astarte-device-sdk-esp32
       - name: Build with idf.py
         run: |
           . $IDF_PATH/export.sh
+          pip install idf-component-manager --upgrade
           idf.py reconfigure
           idf.py build
           # Print component size info

@@ -2,7 +2,15 @@
 
 ## How to use example
 
-### Setup project
+### Setup project using idf component manager (recommended)
+
+* [Install the idf-component manager](https://github.com/espressif/idf-component-manager#installing-the-idf-component-manager)
+* run
+  ```bash
+  idf.py reconfigure
+  ```
+
+### Setup project using git
 
 * Add Astarte component
 
