@@ -8,7 +8,8 @@ set(edgehog_srcs "src/edgehog_device.c"
         "src/edgehog_telemetry.c"
         "src/edgehog_runtime_info.c"
         "src/edgehog_cellular_connection.c"
-        "src/edgehog_network_interface.c")
+        "src/edgehog_network_interface.c"
+        "src/edgehog_geolocation.c")
 
 if (${CONFIG_INDICATOR_GPIO_ENABLE})
     set(edgehog_srcs ${edgehog_srcs} "src/edgehog_led.c")

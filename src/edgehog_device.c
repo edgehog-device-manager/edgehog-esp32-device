@@ -22,6 +22,8 @@
 #include "edgehog_cellular_connection.h"
 #include "edgehog_command.h"
 #include "edgehog_device_private.h"
+#include "edgehog_geolocation.h"
+#include "edgehog_geolocation_p.h"
 #include "edgehog_network_interface.h"
 #include "edgehog_os_info.h"
 #include "edgehog_ota.h"
@@ -171,6 +173,7 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     }
 
     astarte_list_init(&edgehog_device->battery_list);
+    astarte_list_init(&edgehog_device->geolocation_list);
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
     edgehog_ota_init(edgehog_device);
@@ -231,7 +234,8 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
               &runtime_info_interface,
               &cellular_connection_properties_interface,
               &cellular_connection_status_interface,
-              &netif_interface };
+              &netif_interface,
+              &geolocation_interface };
 
     int len = sizeof(interfaces) / sizeof(const astarte_interface_t *);
 
@@ -503,6 +507,7 @@ void edgehog_device_destroy(edgehog_device_handle_t edgehog_device)
     if (edgehog_device) {
         astarte_device_destroy(edgehog_device->astarte_device);
         edgehog_battery_status_delete_list(&edgehog_device->battery_list);
+        edgehog_geolocation_delete_list(&edgehog_device->geolocation_list);
         edgehog_telemetry_destroy(edgehog_device->edgehog_telemetry);
     }
 
@@ -541,6 +546,8 @@ telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
             return edgehog_storage_usage_publish;
         case EDGEHOG_TELEMETRY_BATTERY_STATUS:
             return edgehog_battery_status_publish;
+        case EDGEHOG_TELEMETRY_GEOLOCATION_INFO:
+            return edgehog_geolocation_publish;
         default:
             return NULL;
     }
@@ -558,6 +565,8 @@ telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
         return EDGEHOG_TELEMETRY_STORAGE_USAGE;
     } else if (strcmp(interface_name, battery_status_interface.name) == 0) {
         return EDGEHOG_TELEMETRY_BATTERY_STATUS;
+    } else if (strcmp(interface_name, geolocation_interface.name) == 0) {
+        return EDGEHOG_TELEMETRY_GEOLOCATION_INFO;
     } else {
         return EDGEHOG_TELEMETRY_INVALID;
     }
