@@ -6,6 +6,10 @@
 
 # Edgehog ESP32 Device
 
+Edgehog ESP32 Device is the Edgehog component for Espressif
+[esp-idf](https://docs.espressif.com/projects/esp-idf/en/latest/), that enables remote management of
+Espressif ESP32 devices using [Astarte](https://github.com/astarte-platform/).
+
 ## Contributing
 
 Edgehog ESP32 Device is open to any contribution.
