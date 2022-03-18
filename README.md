@@ -56,6 +56,12 @@ dependencies:
 idf.py build
 ```
 
+## Resources
+
+* [ESP32 Component Documentation](https://edgehog-device-manager.github.io/docs/snapshot/device-sdks/esp32/)
+* [Edgehog documentation](https://edgehog-device-manager.github.io/docs/snapshot/)
+* [Example app](examples/edgehog_app/)
+
 ## Contributing
 
 Edgehog ESP32 Device is open to any contribution.
