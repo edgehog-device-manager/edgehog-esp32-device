@@ -8,7 +8,8 @@
 
 ## Contributing
 
-We are open to any contribution:
+Edgehog ESP32 Device is open to any contribution.
+
 [pull requests](https://github.com/edgehog-device-manager/edgehog-esp32-device/pulls),
 [bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog-esp32-device/issues)
 are welcome.
