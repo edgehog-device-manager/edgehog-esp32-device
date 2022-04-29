@@ -178,15 +178,9 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     astarte_list_init(&edgehog_device->geolocation_list);
 
     ESP_ERROR_CHECK(add_interfaces(config->astarte_device));
-    edgehog_ota_init(edgehog_device);
-    publish_device_hardware_info(edgehog_device);
-    publish_system_status(edgehog_device);
-    edgehog_storage_usage_publish(edgehog_device);
-    edgehog_device_publish_os_info(edgehog_device);
 #if CONFIG_INDICATOR_GPIO_ENABLE
     edgehog_device->led_manager = edgehog_led_behavior_manager_new();
 #endif
-    edgehog_base_image_data_publish(edgehog_device);
     edgehog_telemetry_t *edgehog_telemetry
         = edgehog_telemetry_new(config->telemetry_config, config->telemetry_config_len);
     if (!edgehog_telemetry) {
@@ -195,8 +189,6 @@ edgehog_device_handle_t edgehog_device_new(edgehog_device_config_t *config)
     }
     edgehog_device->edgehog_telemetry = edgehog_telemetry;
 
-    edgehog_runtime_info_publish(edgehog_device);
-    scan_wifi_ap(edgehog_device);
     return edgehog_device;
 
 error:
@@ -204,8 +196,22 @@ error:
     return NULL;
 }
 
+static void edgehog_initial_publish(edgehog_device_handle_t edgehog_device)
+{
+    edgehog_ota_init(edgehog_device);
+    publish_device_hardware_info(edgehog_device);
+    publish_system_status(edgehog_device);
+    edgehog_storage_usage_publish(edgehog_device);
+    edgehog_device_publish_os_info(edgehog_device);
+    edgehog_base_image_data_publish(edgehog_device);
+    edgehog_runtime_info_publish(edgehog_device);
+    scan_wifi_ap(edgehog_device);
+}
+
 edgehog_err_t edgehog_device_start(edgehog_device_handle_t edgehog_device)
 {
+    edgehog_initial_publish(edgehog_device);
+
     edgehog_err_t start_res
         = edgehog_telemetry_start(edgehog_device, edgehog_device->edgehog_telemetry);
     if (start_res != EDGEHOG_OK) {
