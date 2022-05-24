@@ -58,7 +58,7 @@ const static astarte_interface_t hardware_info_interface
 const static astarte_interface_t wifi_scan_result_interface
     = { .name = "io.edgehog.devicemanager.WiFiScanResults",
           .major_version = 0,
-          .minor_version = 1,
+          .minor_version = 2,
           .ownership = OWNERSHIP_DEVICE,
           .type = TYPE_DATASTREAM };
 
@@ -83,6 +83,7 @@ static void publish_device_hardware_info(edgehog_device_handle_t edgehog_device)
 static void publish_system_status(edgehog_device_handle_t edgehog_device);
 static void publish_wifi_ap(edgehog_device_handle_t edgehog_device);
 static void scan_wifi_ap(edgehog_device_handle_t edgehog_device);
+static inline bool compare_mac_address(const uint8_t a[], const uint8_t b[]);
 
 static void edgehog_event_handler(
     void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -373,6 +374,9 @@ static void publish_wifi_ap(edgehog_device_handle_t edgehog_device)
         return;
     }
 
+    wifi_ap_record_t ap_info_connected;
+    bool ap_is_connected = esp_wifi_sta_get_ap_info(&ap_info_connected) == ESP_OK;
+
     ret = esp_wifi_scan_get_ap_records(&ap_count, ap_info);
     if (ret != ESP_OK) {
         free(ap_info);
@@ -389,6 +393,8 @@ static void publish_wifi_ap(edgehog_device_handle_t edgehog_device)
         astarte_bson_serializer_append_string(&bs, "essid", (char *) ap_info[i].ssid);
         astarte_bson_serializer_append_string(&bs, "macAddress", mac);
         astarte_bson_serializer_append_int32(&bs, "rssi", ap_info[i].rssi);
+        astarte_bson_serializer_append_boolean(&bs, "connected",
+            ap_is_connected && compare_mac_address(ap_info[i].bssid, ap_info_connected.bssid));
         astarte_bson_serializer_append_end_of_document(&bs);
 
         int doc_len;
@@ -578,4 +584,9 @@ telemetry_type_t edgehog_device_get_telemetry_type(const char *interface_name)
     } else {
         return EDGEHOG_TELEMETRY_INVALID;
     }
+}
+
+static inline bool compare_mac_address(const uint8_t a[], const uint8_t b[])
+{
+    return memcmp(a, b, 6) == 0;
 }
