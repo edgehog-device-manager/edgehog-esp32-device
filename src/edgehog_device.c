@@ -117,6 +117,7 @@ void edgehog_device_astarte_event_handler(
         // Beware this function blocks the caller until OTA is completed.
         edgehog_err_t ota_result = edgehog_ota_event(edgehog_device, event);
         if (ota_result == EDGEHOG_OK) {
+            edgehog_device_destroy(edgehog_device);
             ESP_LOGI(TAG, "OTA Deploy end successfully, device restart in 5 seconds");
             vTaskDelay(pdMS_TO_TICKS(5000));
             ESP_LOGI(TAG, "Device restart");
