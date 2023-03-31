@@ -544,11 +544,19 @@ esp_err_t edgehog_device_nvs_open(
     return ESP_OK;
 }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+esp_err_t edgehog_device_nvs_entry_find(edgehog_device_handle_t edgehog_device,
+    const char *namespace, nvs_type_t type, nvs_iterator_t *it)
+{
+    return nvs_entry_find(edgehog_device->partition_name, namespace, type, it);
+}
+#else
 nvs_iterator_t edgehog_device_nvs_entry_find(
     edgehog_device_handle_t edgehog_device, const char *namespace, nvs_type_t type)
 {
     return nvs_entry_find(edgehog_device->partition_name, namespace, type);
 }
+#endif
 
 telemetry_periodic edgehog_device_get_telemetry_periodic(telemetry_type_t type)
 {

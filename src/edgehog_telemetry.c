@@ -403,9 +403,20 @@ static void load_telemetry_from_nvs(edgehog_device_handle_t edgehog_device)
         return;
     }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    nvs_iterator_t it;
+    result = edgehog_device_nvs_entry_find(edgehog_device, TELEMETRY_NAMESPACE, NVS_TYPE_I8, &it);
+    if (result != ESP_OK) {
+        ESP_LOGW(TAG, "Unable to find telemetry in nvs, error: %s", esp_err_to_name(result));
+        return;
+    }
+
+    while (nvs_entry_next(&it)) {
+#else
     for (nvs_iterator_t it
          = edgehog_device_nvs_entry_find(edgehog_device, TELEMETRY_NAMESPACE, NVS_TYPE_I8);
          it; it = nvs_entry_next(it)) {
+#endif
         nvs_entry_info_t enable_entry_info;
         nvs_entry_info(it, &enable_entry_info);
 
