@@ -31,7 +31,8 @@ jobs:
     strategy:
       matrix:
         idf-version:
-          - 4.3
+          - "4.3"
+          - "5.0.1"
         build-system:
           - idf
     runs-on: ubuntu-latest
