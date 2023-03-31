@@ -101,6 +101,10 @@ static esp_err_t http_ota_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_DISCONNECTED:
             ESP_LOGD(TAG, "DISCONNECTED");
             break;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        case HTTP_EVENT_REDIRECT:
+            break;
+#endif
     }
     return ESP_OK;
 }
@@ -219,20 +223,31 @@ static edgehog_err_t do_ota(
     nvs_commit(handle);
 
     ESP_LOGI(TAG, "DOWNLOAD_AND_DEPLOY");
-    esp_http_client_config_t config = {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    esp_http_client_config_t http_config = {
         .url = ota_url,
         .event_handler = http_ota_event_handler,
         .timeout_ms = OTA_REQ_TIMEOUT_MS,
     };
+    esp_https_ota_config_t ota_config = {
+        .http_config = &http_config,
+    };
+#else
+    esp_http_client_config_t ota_config = {
+        .url = ota_url,
+        .event_handler = http_ota_event_handler,
+        .timeout_ms = OTA_REQ_TIMEOUT_MS,
+    };
+#endif
 
     uint8_t attempts = 0;
     // FIXME: this function is blocking
-    esp_ret = esp_https_ota(&config);
+    esp_ret = esp_https_ota(&ota_config);
     while (attempts < MAX_OTA_RETRY && esp_ret != ESP_OK) {
         vTaskDelay(pdMS_TO_TICKS(attempts * 2000));
         attempts++;
         ESP_LOGW(TAG, "! OTA FAILED, ATTEMPT #%d !", attempts);
-        esp_ret = esp_https_ota(&config);
+        esp_ret = esp_https_ota(&ota_config);
     }
 
     ESP_LOGI(TAG, "RESULT %s", esp_err_to_name(esp_ret));
