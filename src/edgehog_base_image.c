@@ -39,7 +39,11 @@ const astarte_interface_t base_image_interface = { .name = "io.edgehog.deviceman
 
 void edgehog_base_image_data_publish(edgehog_device_handle_t edgehog_device)
 {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    const esp_app_desc_t *desc = esp_app_get_description();
+#else
     const esp_app_desc_t *desc = esp_ota_get_app_description();
+#endif
     astarte_device_handle_t astarte_device = edgehog_device->astarte_device;
 
     astarte_err_t ret = astarte_device_set_string_property(
@@ -64,7 +68,11 @@ void edgehog_base_image_data_publish(edgehog_device_handle_t edgehog_device)
     }
 
     char sha256_str[65];
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    esp_app_get_elf_sha256(sha256_str, 65);
+#else
     esp_ota_get_app_elf_sha256(sha256_str, 65);
+#endif
     ret = astarte_device_set_string_property(
         astarte_device, base_image_interface.name, "/fingerprint", sha256_str);
     if (ret != ASTARTE_OK) {
