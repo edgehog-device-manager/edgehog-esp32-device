@@ -37,7 +37,7 @@ edgehog_err_t edgehog_command_event(astarte_device_data_event_t *event_request)
 {
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_STRING);
 
-    size_t len;
+    uint32_t len;
     const char *command = astarte_bson_value_to_string(event_request->bson_value, &len);
 
     if (strcmp(command, "Reboot") == 0) {

@@ -157,7 +157,7 @@ edgehog_err_t edgehog_ota_event(
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_DOCUMENT);
 
     uint8_t type;
-    size_t str_value_len;
+    uint32_t str_value_len;
 
     const void *found = astarte_bson_key_lookup("uuid", event_request->bson_value, &type);
     const char *request_uuid = astarte_bson_value_to_string(found, &str_value_len);
