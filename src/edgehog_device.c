@@ -33,6 +33,9 @@
 #include "edgehog_storage_usage.h"
 #include "esp_system.h"
 #include <astarte_bson_serializer.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#include <esp_chip_info.h>
+#endif
 #include <esp_err.h>
 #include <esp_heap_caps.h>
 #include <esp_log.h>

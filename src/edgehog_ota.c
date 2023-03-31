@@ -31,6 +31,9 @@
 #include <esp_partition.h>
 #include <freertos/task.h>
 #include <nvs.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#include <spi_flash_mmap.h>
+#endif
 
 #define OTA_REQ_TIMEOUT_MS (60 * 1000)
 #define MAX_OTA_RETRY 5
