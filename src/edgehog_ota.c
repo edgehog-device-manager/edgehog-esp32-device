@@ -31,6 +31,9 @@
 #include <esp_partition.h>
 #include <freertos/task.h>
 #include <nvs.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#include <spi_flash_mmap.h>
+#endif
 
 #define OTA_REQ_TIMEOUT_MS (60 * 1000)
 #define MAX_OTA_RETRY 5
@@ -98,6 +101,10 @@ static esp_err_t http_ota_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_DISCONNECTED:
             ESP_LOGD(TAG, "DISCONNECTED");
             break;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        case HTTP_EVENT_REDIRECT:
+            break;
+#endif
     }
     return ESP_OK;
 }
@@ -154,7 +161,7 @@ edgehog_err_t edgehog_ota_event(
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_DOCUMENT);
 
     uint8_t type;
-    size_t str_value_len;
+    uint32_t str_value_len;
 
     const void *found = astarte_bson_key_lookup("uuid", event_request->bson_value, &type);
     const char *request_uuid = astarte_bson_value_to_string(found, &str_value_len);
@@ -216,20 +223,31 @@ static edgehog_err_t do_ota(
     nvs_commit(handle);
 
     ESP_LOGI(TAG, "DOWNLOAD_AND_DEPLOY");
-    esp_http_client_config_t config = {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    esp_http_client_config_t http_config = {
         .url = ota_url,
         .event_handler = http_ota_event_handler,
         .timeout_ms = OTA_REQ_TIMEOUT_MS,
     };
+    esp_https_ota_config_t ota_config = {
+        .http_config = &http_config,
+    };
+#else
+    esp_http_client_config_t ota_config = {
+        .url = ota_url,
+        .event_handler = http_ota_event_handler,
+        .timeout_ms = OTA_REQ_TIMEOUT_MS,
+    };
+#endif
 
     uint8_t attempts = 0;
     // FIXME: this function is blocking
-    esp_ret = esp_https_ota(&config);
+    esp_ret = esp_https_ota(&ota_config);
     while (attempts < MAX_OTA_RETRY && esp_ret != ESP_OK) {
         vTaskDelay(pdMS_TO_TICKS(attempts * 2000));
         attempts++;
         ESP_LOGW(TAG, "! OTA FAILED, ATTEMPT #%d !", attempts);
-        esp_ret = esp_https_ota(&config);
+        esp_ret = esp_https_ota(&ota_config);
     }
 
     ESP_LOGI(TAG, "RESULT %s", esp_err_to_name(esp_ret));

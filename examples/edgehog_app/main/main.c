@@ -54,7 +54,7 @@ static void event_handler(
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
     } else if (event_base == EDGEHOG_EVENTS) {
-        ESP_LOGI(TAG, "EDGEHOG EVENT RECEIVED %d", event_id);
+        ESP_LOGI(TAG, "EDGEHOG EVENT RECEIVED %" PRIi32 "", event_id);
     }
 }
 

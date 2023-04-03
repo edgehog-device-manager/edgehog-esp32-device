@@ -47,3 +47,6 @@ examples/edgehog_app/components/astarte-device-sdk-esp32
 doc/out
 /examples/edgehog_app/managed_components/
 /examples/edgehog_app/dependencies.lock
+
+# VS code config
+.vscode/

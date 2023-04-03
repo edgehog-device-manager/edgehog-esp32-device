@@ -24,5 +24,5 @@ dependencies:
   # Required IDF version
   idf: ">=4.1"
   astarte-device-sdk-esp32:
-    version: "v1.0.2"
+    version: "v1.1.0"
     git: https://github.com/astarte-platform/astarte-device-sdk-esp32.git

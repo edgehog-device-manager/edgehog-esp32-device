@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+#include <esp_idf_version.h>
+
 #include "edgehog_device.h"
 #include "edgehog_telemetry.h"
 #if CONFIG_INDICATOR_GPIO_ENABLE
@@ -71,13 +73,19 @@ esp_err_t edgehog_device_nvs_open(
  * @param edgehog_device A valid Edgehog device handle.
  * @param namespace Namespace name.
  * @param type One of nvs_type_t values.
+ * @param it Iterator used to enumerate all the entries found,or NULL if no entry satisfying
+ * criteria was found. Iterator obtained through this function has to be released using
+ * nvs_release_iterator when not used any more.
  *
- * @return Iterator used to enumerate all the entries found,or NULL if no entry satisfying criteria
- * was found. Iterator obtained through this function has to be released using nvs_release_iterator
- * when not used any more.
+ * @return ESP_OK if iterator was created successfully, an esp_err_t otherwise.
  */
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+esp_err_t edgehog_device_nvs_entry_find(edgehog_device_handle_t edgehog_device,
+    const char *namespace, nvs_type_t type, nvs_iterator_t *it);
+#else
 nvs_iterator_t edgehog_device_nvs_entry_find(
     edgehog_device_handle_t edgehog_device, const char *namespace, nvs_type_t type);
+#endif
 
 /**
  * @brief Telemetry periodic callback type.
