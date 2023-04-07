@@ -403,19 +403,16 @@ static void load_telemetry_from_nvs(edgehog_device_handle_t edgehog_device)
         return;
     }
 
+    nvs_iterator_t it = NULL;
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    nvs_iterator_t it;
     result = edgehog_device_nvs_entry_find(edgehog_device, TELEMETRY_NAMESPACE, NVS_TYPE_I8, &it);
-    if (result != ESP_OK) {
-        ESP_LOGW(TAG, "Unable to find telemetry in nvs, error: %s", esp_err_to_name(result));
-        return;
+    if (result == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "Telemetry namespace not found, skipping telemetry update");
     }
-
-    while (nvs_entry_next(&it)) {
+    while (result == ESP_OK) {
 #else
-    for (nvs_iterator_t it
-         = edgehog_device_nvs_entry_find(edgehog_device, TELEMETRY_NAMESPACE, NVS_TYPE_I8);
-         it; it = nvs_entry_next(it)) {
+    it = edgehog_device_nvs_entry_find(edgehog_device, TELEMETRY_NAMESPACE, NVS_TYPE_I8);
+    while (it != NULL) {
 #endif
         nvs_entry_info_t enable_entry_info;
         nvs_entry_info(it, &enable_entry_info);
@@ -444,7 +441,15 @@ static void load_telemetry_from_nvs(edgehog_device_handle_t edgehog_device)
         }
 
         telemetry_schedule(edgehog_device, telemetry_type, period_seconds);
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+        result = nvs_entry_next(&it);
     }
+    nvs_release_iterator(it);
+#else
+        it = nvs_entry_next(it);
+    }
+#endif
 
     nvs_close(nvs_handle);
 }
