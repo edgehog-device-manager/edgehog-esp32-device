@@ -41,7 +41,8 @@ cmake-build*
 *.su
 
 examples/**/build
-examples/**/sdkconfig*
+examples/**/sdkconfig
+examples/**/sdkconfig.old
 examples/edgehog_app/components/astarte-device-sdk-esp32
 
 doc/out

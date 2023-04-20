@@ -67,4 +67,3 @@ OTA Data partition is updated to specify that this image should be used for the 
 Build the project and flash it to the board, then run the monitor tool to view the serial output:
 
 Run `idf.py -p PORT flash monitor` to build, flash and monitor the project.
-

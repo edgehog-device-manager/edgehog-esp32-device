@@ -5,3 +5,7 @@ Source: https://github.com/edgehog-device-manager/edgehog-esp32-device
 Files: CHANGELOG.md
 Copyright: 2022 SECO Mind Srl
 License: CC0-1.0
+
+Files: examples/edgehog_app/sdkconfig.defaults
+Copyright: 2023 SECO Mind Srl
+License: CC0-1.0

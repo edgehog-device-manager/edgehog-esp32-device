@@ -34,6 +34,9 @@ jobs:
         sudo apt-get install -y clang-format
         curl -sSfL https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py -o run-clang-format
         chmod +x run-clang-format
-    - name: Check formatting
+    - name: Check formatting library
       run: |
-        ./run-clang-format --style=file -r src/*.c include/*.h private/*.h examples/edgehog_app
+        ./run-clang-format --style=file -r src/*.c include/*.h private/*.h
+    - name: Check formatting examples
+      run: |
+        ./run-clang-format --style=file examples/**/main/main.c examples/**/main/src/*.c examples/**/main/include/*.h

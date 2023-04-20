@@ -18,6 +18,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-idf_component_register(SRCS "main.c"
-        INCLUDE_DIRS ""
+idf_component_register(SRCS "main.c" "./src/wifi_cfg.c" "./src/example_task.c"
+        INCLUDE_DIRS "./include"
         REQUIRES edgehog-esp32-device nvs_flash)
