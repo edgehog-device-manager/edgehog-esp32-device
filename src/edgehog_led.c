@@ -20,6 +20,7 @@
 
 #include "edgehog_led.h"
 #include "driver/gpio.h"
+#include "esp_timer.h"
 #include <astarte_bson.h>
 #include <astarte_bson_types.h>
 #include <esp_log.h>
@@ -54,10 +55,28 @@ struct edgehog_led_behavior_manager_t
 
 edgehog_led_behavior_manager_handle_t edgehog_led_behavior_manager_new()
 {
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    // zero-initialize the config structure.
+    gpio_config_t io_conf = {};
+    // disable interrupt
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    // set as output mode
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    // bit mask of the pin to set
+    io_conf.pin_bit_mask = (1ULL << CONFIG_INDICATOR_GPIO);
+    // disable pull-down mode
+    io_conf.pull_down_en = 0;
+    // disable pull-up mode
+    io_conf.pull_up_en = 0;
+    // configure GPIO with the given settings
+    gpio_config(&io_conf);
+#else
     // Set the pad as GPIO
     gpio_pad_select_gpio(CONFIG_INDICATOR_GPIO);
     // Set LED GPIO as output
     gpio_set_direction(CONFIG_INDICATOR_GPIO, GPIO_MODE_OUTPUT);
+#endif
 
     edgehog_led_behavior_manager_handle_t led_behavior_handle
         = calloc(1, sizeof(struct edgehog_led_behavior_manager_t));
@@ -78,25 +97,25 @@ static void blinkTaskCode(void *pvParameters)
         switch (params->behavior) {
             case BLINK:
                 gpio_set_level(CONFIG_INDICATOR_GPIO, ON);
-                vTaskDelay(1000 / portTICK_RATE_MS);
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
                 gpio_set_level(CONFIG_INDICATOR_GPIO, OFF);
-                vTaskDelay(1000 / portTICK_RATE_MS);
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
                 break;
             case DOUBLE_BLINK:
                 gpio_set_level(CONFIG_INDICATOR_GPIO, ON);
-                vTaskDelay(300 / portTICK_RATE_MS);
+                vTaskDelay(300 / portTICK_PERIOD_MS);
                 gpio_set_level(CONFIG_INDICATOR_GPIO, OFF);
-                vTaskDelay(200 / portTICK_RATE_MS);
+                vTaskDelay(200 / portTICK_PERIOD_MS);
                 gpio_set_level(CONFIG_INDICATOR_GPIO, ON);
-                vTaskDelay(300 / portTICK_RATE_MS);
+                vTaskDelay(300 / portTICK_PERIOD_MS);
                 gpio_set_level(CONFIG_INDICATOR_GPIO, OFF);
-                vTaskDelay(1000 / portTICK_RATE_MS);
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
                 break;
             case SLOW_BLINK:
                 gpio_set_level(CONFIG_INDICATOR_GPIO, ON);
-                vTaskDelay(2000 / portTICK_RATE_MS);
+                vTaskDelay(2000 / portTICK_PERIOD_MS);
                 gpio_set_level(CONFIG_INDICATOR_GPIO, OFF);
-                vTaskDelay(2000 / portTICK_RATE_MS);
+                vTaskDelay(2000 / portTICK_PERIOD_MS);
                 break;
             default:
                 ESP_LOGE(TAG, "Unexpected Led behavior %d", params->behavior);
@@ -162,7 +181,7 @@ edgehog_err_t edgehog_led_behavior_event(
 {
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/indicator/behavior", BSON_TYPE_STRING);
 
-    size_t str_value_len;
+    uint32_t str_value_len;
     const char *request_behavior
         = astarte_bson_value_to_string(event_request->bson_value, &str_value_len);
 

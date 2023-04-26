@@ -40,6 +40,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+      - name: Add to the default configuration the LED enable
+        run: |
+          echo 'CONFIG_INDICATOR_GPIO_ENABLE=y' >> sdkconfig.defaults
+          echo 'CONFIG_INDICATOR_GPIO=1' >> sdkconfig.defaults
+        working-directory: ./examples/edgehog_app
+        shell: bash
       - name: Build with idf.py
         run: |
           . $IDF_PATH/export.sh
