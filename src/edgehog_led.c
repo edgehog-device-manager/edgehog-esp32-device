@@ -84,7 +84,7 @@ edgehog_led_behavior_manager_handle_t edgehog_led_behavior_manager_new()
         ESP_LOGE(TAG, "Unable to allocate memory for led behavior manager handle");
         return NULL;
     }
-    led_behavior_handle->default_behavior = OFF;
+    edgehog_led_behavior_set_default(led_behavior_handle, OFF);
     return led_behavior_handle;
 }
 

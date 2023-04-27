@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add support to ESP-IDF v5.0.
 
+### Fixed
+- Fix GPIO still active issue after execution of LedBehavior routine.
+
 ## [0.5.2] - 2022-06-22
 
 ## [0.5.1] - 2022-06-01

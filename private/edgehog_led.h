@@ -31,12 +31,13 @@ extern "C" {
 /**
  * @brief Supported LED behaviors
  *
- * @details Enum defining the possible behaviors supported.
+ * @details Enum defining the possible behaviors supported. The ON/OFF statuses assume the external
+ * LED is connected to ground through a resistive load.
  */
 typedef enum
 {
-    ON = 0, /**< Always ON - Only for Default behavior*/
-    OFF, /**< Always OFF - Only for Default behavior*/
+    OFF = 0, /**< Always OFF - Only for Default behavior*/
+    ON, /**< Always ON - Only for Default behavior*/
     BLINK, /**< Blinking behavior 1 sec. ON 1 sec, OFF*/
     DOUBLE_BLINK, /**< Two small blink and 1 sec. OFF*/
     SLOW_BLINK /**< Slow blinking behavior. 2 sec. ON 2 sec. OFF*/
