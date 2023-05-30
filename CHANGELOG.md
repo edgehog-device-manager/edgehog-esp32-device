@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - Unreleased
 ### Added
 - Add support to ESP-IDF v5.0.
+- Add support for `io.edgehog.devicemanager.OTAEvent` interface.
+- Add support for update/cancel operation in `io.edgehog.devicemanager.OTARequest` interface.
+
+### Removed
+- Remove support for `io.edgehog.devicemanager.OTAResponse` interface.
 
 ### Fixed
 - Fix GPIO still active issue after execution of LedBehavior routine.

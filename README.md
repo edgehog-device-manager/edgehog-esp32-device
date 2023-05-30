@@ -40,7 +40,7 @@ Create a new `idf_component.yml` in the project root directory, as follows:
 ## IDF Component Manager Manifest File
 dependencies:
   idf:
-    version: ">=4.1.0"
+    version: ">=4.4.4"
   edgehog-esp32-device:
     version: "*" # this is the latest commit on the main branch
     git: https://github.com/edgehog-device-manager/edgehog-esp32-device.git
@@ -55,6 +55,38 @@ dependencies:
 ```bash
 idf.py build
 ```
+
+## Component Free RTOS APIs usage
+
+The Edgehog ESP32 Device interacts internally with the Free RTOS APIs. As such some factors
+should be taken into account when integrating this component in a larger system.
+
+The following **tasks** are spawned directly by the Edgehog ESP32 Device:
+- `BLINK TASK`: Provides functionality for visual feedback using an on board LED.
+It is only spawned if `CONFIG_INDICATOR_GPIO_ENABLE` is set in the Edgehog ESP32 device
+configuration, will use `2048` words from the stack, and can be triggered by a publish from the
+Astarte cluster to the dedicated LED interface. This task has a fixed duration and will be deleted
+at timeout.
+- `OTA UPDATE TASK`: Provides functionality for OTA updates.
+It will use `4096` words from the stack, and can be triggered by a publish from the
+Astarte cluster to the dedicated OTA update interface. This task does not have a fixed duration, it
+will run untill a successful OTA update has been downloaded and flashed or the procedure failed.
+Note that the OTA update task could restart the device.
+
+All of the tasks are spawned with the lowest priority and rely on the time slicing functionality
+of freertos to run concurrently with the main task.
+
+Other than tasks, a certain number of **software timers** are also created to be used for telemetry.
+The actual number of timers that this component is going to use will depend on the
+telemetry configuration of your project. Each telemetry type will create a separate timer.
+Software timers run all in a single task instantiated by freertos. The stack size and priority for
+such task should be configured in the project using this component.
+This module has been tested using `2048` words for the stack size and a priority of `1` for the
+timer task.
+
+In addition to what stated above, this component requires an Astarte ESP32 Device to be externally
+instantiated and provided in its configuration struct. The Astarte ESP32 Device interacts internally
+with the Free RTOS APIs and its resource usage should be evaluated separately.
 
 ## Resources
 

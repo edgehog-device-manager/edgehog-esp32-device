@@ -42,8 +42,6 @@
 #include <esp_timer.h>
 #include <esp_wifi.h>
 #include <esp_wifi_types.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <string.h>
 #include <uuid.h>
 
@@ -118,13 +116,9 @@ void edgehog_device_astarte_event_handler(
     }
 
     if (strcmp(event->interface_name, ota_request_interface.name) == 0) {
-        // Beware this function blocks the caller until OTA is completed.
         edgehog_err_t ota_result = edgehog_ota_event(edgehog_device, event);
-        if (ota_result == EDGEHOG_OK) {
-            ESP_LOGI(TAG, "OTA Deploy end successfully, device restart in 5 seconds");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-            ESP_LOGI(TAG, "Device restart");
-            esp_restart();
+        if (ota_result != EDGEHOG_OK) {
+            ESP_LOGE(TAG, "Unable to handle OTA update request");
         }
     } else if (strcmp(event->interface_name, commands_interface.name) == 0) {
         if (edgehog_command_event(event) != EDGEHOG_OK) {
@@ -233,7 +227,7 @@ esp_err_t add_interfaces(astarte_device_handle_t device)
               &wifi_scan_result_interface,
               &system_info_interface,
               &ota_request_interface,
-              &ota_response_interface,
+              &ota_event_interface,
               &storage_usage_interface,
               &battery_status_interface,
               &commands_interface,

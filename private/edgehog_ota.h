@@ -28,7 +28,7 @@ extern "C" {
 #include "edgehog_device.h"
 
 extern const astarte_interface_t ota_request_interface;
-extern const astarte_interface_t ota_response_interface;
+extern const astarte_interface_t ota_event_interface;
 
 /**
  * @brief initialize Edgehog device OTA.
@@ -36,26 +36,23 @@ extern const astarte_interface_t ota_response_interface;
  * @details This function initializes the OTA procedure and
  * if there is any pending OTA it completes it.
  *
- * @param edgehog_device A valid Edgehog device handle.
+ * @param edgehog_dev A valid Edgehog device handle.
  */
-
-void edgehog_ota_init(edgehog_device_handle_t edgehog_device);
+void edgehog_ota_init(edgehog_device_handle_t edgehog_dev);
 
 /**
  * @brief receive Edgehog device OTA.
  *
- * @details This function receives an OTA event request from Astarte,
- * internally call do_ota function which is blocking, the calling
- * task will be blocked until the OTA procedure completes.
+ * @details This function receives an OTA event request from Astarte. This function may spawn a
+ * new task to preform the OTA update.
  *
- * @param edgehog_device A valid Edgehog device handle.
+ * @param edgehog_dev A valid Edgehog device handle.
  * @param event_request A valid Astarte device data event.
  *
  * @return EDGEHOG_OK if the OTA event is handled successfully, an edgehog_err_t otherwise.
  */
-
 edgehog_err_t edgehog_ota_event(
-    edgehog_device_handle_t edgehog_device, astarte_device_data_event_t *event_request);
+    edgehog_device_handle_t edgehog_dev, astarte_device_data_event_t *event_request);
 
 #ifdef __cplusplus
 }

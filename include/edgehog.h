@@ -41,12 +41,14 @@ typedef enum
     EDGEHOG_ERR = 1, /**< A generic error occurred. This is usually an internal error in the SDK */
     EDGEHOG_ERR_NETWORK = 2, /**< A generic network error occurred. */
     EDGEHOG_ERR_NVS = 3, /**< A generic error occurred when dealing with NVS */
-    EDGEHOG_ERR_OTA_ALREADY_IN_PROGRESS = 4, /**< Attempted to perform OTA operation while there is another one already active*/
-    EDGEHOG_ERR_OTA_FAILED = 5, /**< An error occurred during OTA procedure */
-    EDGEHOG_ERR_OTA_DEPLOY = 6, /**< An error occurred during OTA Deploy procedure */
-    EDGEHOG_ERR_OTA_WRONG_PARTITION = 7, /**< The OTA procedure boot on the wrong partition */
-    EDGEHOG_ERR_TASK_CREATE = 8, /**< xTaskCreate was unable to spawn a new task */
-    EDGEHOG_ERR_DEVICE_NOT_READY = 9, /**< Tried to perform an operation on a Device in a non-ready or initialized state */
+    EDGEHOG_ERR_OTA_INVALID_REQUEST = 4, /**< Invalid OTA update request received */
+    EDGEHOG_ERR_OTA_ALREADY_IN_PROGRESS = 5, /**< Attempted to perform OTA operation while there is another one already active*/
+    EDGEHOG_ERR_OTA_INVALID_IMAGE = 6, /**< Invalid OTA image received */
+    EDGEHOG_ERR_OTA_SYSTEM_ROLLBACK = 7, /**< The OTA procedure boot on the wrong partition */
+    EDGEHOG_ERR_OTA_CANCELED = 8, /**< OTA update aborted by Edgehog half way during the procedure */
+    EDGEHOG_ERR_OTA_INTERNAL = 9, /**< An error occurred during OTA procedure */
+    EDGEHOG_ERR_TASK_CREATE = 10, /**< xTaskCreate was unable to spawn a new task */
+    EDGEHOG_ERR_DEVICE_NOT_READY = 11, /**< Tried to perform an operation on a Device in a non-ready or initialized state */
 }edgehog_err_t;
 
 // clang-format on
