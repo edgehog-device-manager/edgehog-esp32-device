@@ -153,8 +153,8 @@ static edgehog_err_t set_led_behavior(
     led_manager->current_config->default_behavior = led_manager->default_behavior;
     led_manager->current_config->terminated = false;
 
-    BaseType_t ret = xTaskCreate(blinkTaskCode, "NAME", STACK_SIZE, led_manager->current_config,
-        tskIDLE_PRIORITY, &led_manager->task_handle);
+    BaseType_t ret = xTaskCreate(blinkTaskCode, "BLINK TASK", STACK_SIZE,
+        led_manager->current_config, tskIDLE_PRIORITY, &led_manager->task_handle);
 
     if (ret != pdPASS) {
         free(led_manager->current_config);
