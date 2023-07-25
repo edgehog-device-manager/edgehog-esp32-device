@@ -34,7 +34,7 @@ const astarte_interface_t geolocation_interface = { .name = "io.edgehog.devicema
 
 struct geolocation_info_t
 {
-    struct astarte_list_head_t head;
+    astarte_list_head_t head;
     bool updated;
     char *id;
     double longitude;
@@ -46,10 +46,10 @@ struct geolocation_info_t
     double speed;
 };
 
-void edgehog_geolocation_delete_list(struct astarte_list_head_t *geolocation_list)
+void edgehog_geolocation_delete_list(astarte_list_head_t *geolocation_list)
 {
-    struct astarte_list_head_t *item;
-    struct astarte_list_head_t *tmp;
+    astarte_list_head_t *item;
+    astarte_list_head_t *tmp;
     MUTABLE_LIST_FOR_EACH(item, tmp, geolocation_list)
     {
         struct geolocation_info_t *status = GET_LIST_ENTRY(item, struct geolocation_info_t, head);
@@ -59,9 +59,9 @@ void edgehog_geolocation_delete_list(struct astarte_list_head_t *geolocation_lis
 }
 
 static struct geolocation_info_t *find_geolocation(
-    struct astarte_list_head_t *geolocation_list, const char *gps_id)
+    astarte_list_head_t *geolocation_list, const char *gps_id)
 {
-    struct astarte_list_head_t *item;
+    astarte_list_head_t *item;
     LIST_FOR_EACH(item, geolocation_list)
     {
         struct geolocation_info_t *status = GET_LIST_ENTRY(item, struct geolocation_info_t, head);
@@ -130,7 +130,7 @@ void edgehog_geolocation_update(
 
 void edgehog_geolocation_publish(edgehog_device_handle_t edgehog_device)
 {
-    struct astarte_list_head_t *item;
+    astarte_list_head_t *item;
     LIST_FOR_EACH(item, &edgehog_device->geolocation_list)
     {
         struct geolocation_info_t *data = GET_LIST_ENTRY(item, struct geolocation_info_t, head);

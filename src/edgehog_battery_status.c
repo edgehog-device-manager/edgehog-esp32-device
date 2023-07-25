@@ -37,7 +37,7 @@ const astarte_interface_t battery_status_interface
 
 struct battery_status_t
 {
-    struct astarte_list_head_t head;
+    astarte_list_head_t head;
     bool updated;
     char *battery_slot;
     double level_percentage;
@@ -48,10 +48,10 @@ struct battery_status_t
 static const char *edgehog_battery_to_code(edgehog_battery_state state);
 static double normalize_error_level(double level);
 
-void edgehog_battery_status_delete_list(struct astarte_list_head_t *battery_list)
+void edgehog_battery_status_delete_list(astarte_list_head_t *battery_list)
 {
-    struct astarte_list_head_t *item;
-    struct astarte_list_head_t *tmp;
+    astarte_list_head_t *item;
+    astarte_list_head_t *tmp;
     MUTABLE_LIST_FOR_EACH(item, tmp, battery_list)
     {
         struct battery_status_t *status = GET_LIST_ENTRY(item, struct battery_status_t, head);
@@ -61,9 +61,9 @@ void edgehog_battery_status_delete_list(struct astarte_list_head_t *battery_list
 }
 
 static struct battery_status_t *find_battery(
-    struct astarte_list_head_t *battery_list, const char *battery_slot)
+    astarte_list_head_t *battery_list, const char *battery_slot)
 {
-    struct astarte_list_head_t *item;
+    astarte_list_head_t *item;
     LIST_FOR_EACH(item, battery_list)
     {
         struct battery_status_t *status = GET_LIST_ENTRY(item, struct battery_status_t, head);
@@ -126,7 +126,7 @@ void edgehog_battery_status_update(
 
 void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
 {
-    struct astarte_list_head_t *item;
+    astarte_list_head_t *item;
     LIST_FOR_EACH(item, &edgehog_device->battery_list)
     {
         struct battery_status_t *battery = GET_LIST_ENTRY(item, struct battery_status_t, head);

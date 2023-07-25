@@ -27,6 +27,6 @@
 
 extern const astarte_interface_t geolocation_interface;
 
-void edgehog_geolocation_delete_list(struct astarte_list_head_t *geolocation_list);
+void edgehog_geolocation_delete_list(astarte_list_head_t *geolocation_list);
 
 #endif // EDGEHOG_GEOLOCATION_P_H

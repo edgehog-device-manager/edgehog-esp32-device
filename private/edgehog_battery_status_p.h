@@ -31,6 +31,6 @@
 
 extern const astarte_interface_t battery_status_interface;
 
-void edgehog_battery_status_delete_list(struct astarte_list_head_t *battery_list);
+void edgehog_battery_status_delete_list(astarte_list_head_t *battery_list);
 
 #endif // EDGEHOG_BATTERY_STATUS_P_H

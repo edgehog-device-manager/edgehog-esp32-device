@@ -60,7 +60,7 @@ const astarte_interface_t telemetry_config_interface
           .ownership = OWNERSHIP_SERVER,
           .type = TYPE_PROPERTIES };
 
-typedef struct astarte_list_head_t timer_list_head_t;
+typedef astarte_list_head_t timer_list_head_t;
 
 struct timer_ptr_entry_t
 {

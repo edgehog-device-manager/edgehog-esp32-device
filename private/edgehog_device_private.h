@@ -45,8 +45,8 @@ struct edgehog_device_t
 #endif
     edgehog_telemetry_t *edgehog_telemetry;
 
-    struct astarte_list_head_t battery_list;
-    struct astarte_list_head_t geolocation_list;
+    astarte_list_head_t battery_list;
+    astarte_list_head_t geolocation_list;
 };
 
 /**
