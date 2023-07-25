@@ -69,8 +69,7 @@ void edgehog_connection_status_publish(edgehog_device_handle_t edgehog_device, c
     }
     astarte_bson_serializer_append_end_of_document(bs);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     char *path = malloc(strlen(modem_id) + 2); // 2 = strlen("/") + 1
     if (!path) {
         ESP_LOGE(TAG, "Unable to allocate memory for path");

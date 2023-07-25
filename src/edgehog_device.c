@@ -328,8 +328,7 @@ static void publish_system_status(edgehog_device_handle_t edgehog_device)
     astarte_bson_serializer_append_int64(bs, "uptimeMillis", uptime_millis);
     astarte_bson_serializer_append_end_of_document(bs);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     astarte_device_stream_aggregate(edgehog_device->astarte_device,
         system_status_status_interface.name, "/systemStatus", doc, 0);
     astarte_bson_serializer_destroy(bs);
@@ -392,8 +391,7 @@ static void publish_wifi_ap(edgehog_device_handle_t edgehog_device)
             ap_is_connected && compare_mac_address(ap_info[i].bssid, ap_info_connected.bssid));
         astarte_bson_serializer_append_end_of_document(bs);
 
-        int doc_len;
-        const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+        const void *doc = astarte_bson_serializer_get_document(bs, NULL);
         astarte_device_stream_aggregate(
             edgehog_device->astarte_device, wifi_scan_result_interface.name, "/ap", doc, 0);
         astarte_bson_serializer_destroy(bs);

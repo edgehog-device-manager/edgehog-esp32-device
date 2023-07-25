@@ -196,43 +196,49 @@ end:
 edgehog_err_t edgehog_ota_event(
     edgehog_device_handle_t edgehog_dev, astarte_device_data_event_t *event_request)
 {
-    uint8_t type;
-
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_DOCUMENT);
 
     // Step 1 get UUID, URL and operation from Astarte request
+    astarte_bson_document_t doc
+        = astarte_bson_deserializer_element_to_document(event_request->bson_element);
 
-    const void *found = astarte_bson_key_lookup("uuid", event_request->bson_element.value, &type);
-    uint32_t req_uuid_len;
-    const char *req_uuid = astarte_bson_value_to_string(found, &req_uuid_len);
-    if (!req_uuid || type != BSON_TYPE_STRING) {
+    astarte_bson_element_t req_uuid_element;
+    astarte_err_t astarte_err
+        = astarte_bson_deserializer_element_lookup(doc, "uuid", &req_uuid_element);
+    if (astarte_err != ASTARTE_OK || req_uuid_element.type != BSON_TYPE_STRING) {
         ESP_LOGE(TAG, "Unable to extract requestUUID from bson");
         esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_FAILED_EVENT, NULL, 0, 0);
         return EDGEHOG_ERR_OTA_INVALID_REQUEST;
     }
+
+    uint32_t req_uuid_len;
+    const char *req_uuid
+        = astarte_bson_deserializer_element_to_string(req_uuid_element, &req_uuid_len);
     ESP_LOGI(TAG, "OTA UPDATE REQUEST UUID : %s", req_uuid);
 
-    found = astarte_bson_key_lookup("url", event_request->bson_element.value, &type);
-    uint32_t ota_url_len;
-    const char *ota_url = astarte_bson_value_to_string(found, &ota_url_len);
-    if (!ota_url || type != BSON_TYPE_STRING) {
+    astarte_bson_element_t url_element;
+    astarte_err = astarte_bson_deserializer_element_lookup(doc, "url", &url_element);
+    if (astarte_err != ASTARTE_OK || url_element.type != BSON_TYPE_STRING) {
         ESP_LOGE(TAG, "Unable to extract URL from bson");
         pub_ota_event(
             edgehog_dev, req_uuid, OTA_EVENT_FAILURE, 0, EDGEHOG_ERR_OTA_INVALID_REQUEST, "");
         esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_FAILED_EVENT, NULL, 0, 0);
         return EDGEHOG_ERR_OTA_INVALID_REQUEST;
     }
+    uint32_t ota_url_len;
+    const char *ota_url = astarte_bson_deserializer_element_to_string(url_element, &ota_url_len);
 
-    found = astarte_bson_key_lookup("operation", event_request->bson_element.value, &type);
-    uint32_t str_value_len;
-    const char *ota_operation = astarte_bson_value_to_string(found, &str_value_len);
-    if (!ota_operation || type != BSON_TYPE_STRING) {
+    astarte_bson_element_t operation_element;
+    astarte_err = astarte_bson_deserializer_element_lookup(doc, "operation", &operation_element);
+    if (astarte_err != ASTARTE_OK || operation_element.type != BSON_TYPE_STRING) {
         ESP_LOGE(TAG, "Unable to extract operation from bson");
         pub_ota_event(
             edgehog_dev, req_uuid, OTA_EVENT_FAILURE, 0, EDGEHOG_ERR_OTA_INVALID_REQUEST, "");
         esp_event_post(EDGEHOG_EVENTS, EDGEHOG_OTA_FAILED_EVENT, NULL, 0, 0);
         return EDGEHOG_ERR_OTA_INVALID_REQUEST;
     }
+    const char *ota_operation
+        = astarte_bson_deserializer_element_to_string(operation_element, NULL);
 
     // Step 2 Perform the requested Update or Cancel operation.
 
@@ -565,8 +571,7 @@ static void pub_ota_event(edgehog_device_handle_t edgehog_dev, const char *reque
     astarte_bson_serializer_append_string(bs, "message", message);
     astarte_bson_serializer_append_end_of_document(bs);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     astarte_device_stream_aggregate(
         edgehog_dev->astarte_device, ota_event_interface.name, "/event", doc, 0);
     astarte_bson_serializer_destroy(bs);

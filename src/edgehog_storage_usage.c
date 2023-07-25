@@ -76,8 +76,7 @@ static void publish_storage_usage(
     }
     snprintf(path, path_size, "/%s", label);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     astarte_device_stream_aggregate(astarte_device, storage_usage_interface.name, path, doc, 0);
     astarte_bson_serializer_destroy(bs);
     free(path);

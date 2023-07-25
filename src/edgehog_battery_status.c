@@ -151,8 +151,7 @@ void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
         }
         snprintf(path, path_size, "/%s", battery->battery_slot);
 
-        int doc_len;
-        const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+        const void *doc = astarte_bson_serializer_get_document(bs, NULL);
         astarte_err_t res = astarte_device_stream_aggregate(
             edgehog_device->astarte_device, battery_status_interface.name, path, doc, 0);
         astarte_bson_serializer_destroy(bs);

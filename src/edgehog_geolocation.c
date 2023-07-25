@@ -156,8 +156,7 @@ void edgehog_geolocation_publish(edgehog_device_handle_t edgehog_device)
         }
         snprintf(path, path_size, "/%s", data->id);
 
-        int doc_len;
-        const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
+        const void *doc = astarte_bson_serializer_get_document(bs, NULL);
         astarte_err_t res = astarte_device_stream_aggregate(
             edgehog_device->astarte_device, geolocation_interface.name, path, doc, 0);
 
