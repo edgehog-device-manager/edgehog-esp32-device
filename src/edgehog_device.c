@@ -321,19 +321,18 @@ static void publish_system_status(edgehog_device_handle_t edgehog_device)
     uint32_t avail_memory = esp_get_free_heap_size();
     int task_count = uxTaskGetNumberOfTasks();
 
-    struct astarte_bson_serializer_t bs;
-    astarte_bson_serializer_init(&bs);
-    astarte_bson_serializer_append_int64(&bs, "availMemoryBytes", avail_memory);
-    astarte_bson_serializer_append_string(&bs, "bootId", edgehog_device->boot_id);
-    astarte_bson_serializer_append_int32(&bs, "taskCount", task_count);
-    astarte_bson_serializer_append_int64(&bs, "uptimeMillis", uptime_millis);
-    astarte_bson_serializer_append_end_of_document(&bs);
+    astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+    astarte_bson_serializer_append_int64(bs, "availMemoryBytes", avail_memory);
+    astarte_bson_serializer_append_string(bs, "bootId", edgehog_device->boot_id);
+    astarte_bson_serializer_append_int32(bs, "taskCount", task_count);
+    astarte_bson_serializer_append_int64(bs, "uptimeMillis", uptime_millis);
+    astarte_bson_serializer_append_end_of_document(bs);
 
     int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
     astarte_device_stream_aggregate(edgehog_device->astarte_device,
         system_status_status_interface.name, "/systemStatus", doc, 0);
-    astarte_bson_serializer_destroy(&bs);
+    astarte_bson_serializer_destroy(bs);
 }
 
 static void scan_wifi_ap(edgehog_device_handle_t edgehog_device)
@@ -384,21 +383,20 @@ static void publish_wifi_ap(edgehog_device_handle_t edgehog_device)
         snprintf(mac, 18, "%02x:%02x:%02x:%02x:%02x:%02x", ap_info[i].bssid[0], ap_info[i].bssid[1],
             ap_info[i].bssid[2], ap_info[i].bssid[3], ap_info[i].bssid[4], ap_info[i].bssid[5]);
 
-        struct astarte_bson_serializer_t bs;
-        astarte_bson_serializer_init(&bs);
-        astarte_bson_serializer_append_int32(&bs, "channel", ap_info[i].primary);
-        astarte_bson_serializer_append_string(&bs, "essid", (char *) ap_info[i].ssid);
-        astarte_bson_serializer_append_string(&bs, "macAddress", mac);
-        astarte_bson_serializer_append_int32(&bs, "rssi", ap_info[i].rssi);
-        astarte_bson_serializer_append_boolean(&bs, "connected",
+        astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+        astarte_bson_serializer_append_int32(bs, "channel", ap_info[i].primary);
+        astarte_bson_serializer_append_string(bs, "essid", (char *) ap_info[i].ssid);
+        astarte_bson_serializer_append_string(bs, "macAddress", mac);
+        astarte_bson_serializer_append_int32(bs, "rssi", ap_info[i].rssi);
+        astarte_bson_serializer_append_boolean(bs, "connected",
             ap_is_connected && compare_mac_address(ap_info[i].bssid, ap_info_connected.bssid));
-        astarte_bson_serializer_append_end_of_document(&bs);
+        astarte_bson_serializer_append_end_of_document(bs);
 
         int doc_len;
-        const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+        const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
         astarte_device_stream_aggregate(
             edgehog_device->astarte_device, wifi_scan_result_interface.name, "/ap", doc, 0);
-        astarte_bson_serializer_destroy(&bs);
+        astarte_bson_serializer_destroy(bs);
     }
 
     free(ap_info);

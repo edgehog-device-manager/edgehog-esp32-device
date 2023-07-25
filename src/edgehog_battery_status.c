@@ -135,14 +135,13 @@ void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
             continue;
         }
 
-        struct astarte_bson_serializer_t bs;
-        astarte_bson_serializer_init(&bs);
-        astarte_bson_serializer_append_double(&bs, "levelPercentage", battery->level_percentage);
+        astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+        astarte_bson_serializer_append_double(bs, "levelPercentage", battery->level_percentage);
         astarte_bson_serializer_append_double(
-            &bs, "levelAbsoluteError", battery->level_absolute_error);
+            bs, "levelAbsoluteError", battery->level_absolute_error);
         const char *battery_status = edgehog_battery_to_code(battery->battery_state);
-        astarte_bson_serializer_append_string(&bs, "status", battery_status);
-        astarte_bson_serializer_append_end_of_document(&bs);
+        astarte_bson_serializer_append_string(bs, "status", battery_status);
+        astarte_bson_serializer_append_end_of_document(bs);
 
         size_t path_size = strlen(battery->battery_slot) + 2;
         char *path = malloc(path_size);
@@ -153,10 +152,10 @@ void edgehog_battery_status_publish(edgehog_device_handle_t edgehog_device)
         snprintf(path, path_size, "/%s", battery->battery_slot);
 
         int doc_len;
-        const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+        const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
         astarte_err_t res = astarte_device_stream_aggregate(
             edgehog_device->astarte_device, battery_status_interface.name, path, doc, 0);
-        astarte_bson_serializer_destroy(&bs);
+        astarte_bson_serializer_destroy(bs);
         free(path);
 
         if (res == ASTARTE_OK) {

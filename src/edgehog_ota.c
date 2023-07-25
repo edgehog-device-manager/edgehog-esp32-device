@@ -557,18 +557,17 @@ static void pub_ota_event(edgehog_device_handle_t edgehog_dev, const char *reque
             break;
     }
 
-    struct astarte_bson_serializer_t bs;
-    astarte_bson_serializer_init(&bs);
-    astarte_bson_serializer_append_string(&bs, "requestUUID", request_uuid);
-    astarte_bson_serializer_append_string(&bs, "status", status);
-    astarte_bson_serializer_append_int32(&bs, "statusProgress", status_progress);
-    astarte_bson_serializer_append_string(&bs, "statusCode", status_code);
-    astarte_bson_serializer_append_string(&bs, "message", message);
-    astarte_bson_serializer_append_end_of_document(&bs);
+    astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+    astarte_bson_serializer_append_string(bs, "requestUUID", request_uuid);
+    astarte_bson_serializer_append_string(bs, "status", status);
+    astarte_bson_serializer_append_int32(bs, "statusProgress", status_progress);
+    astarte_bson_serializer_append_string(bs, "statusCode", status_code);
+    astarte_bson_serializer_append_string(bs, "message", message);
+    astarte_bson_serializer_append_end_of_document(bs);
 
     int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, &doc_len);
     astarte_device_stream_aggregate(
         edgehog_dev->astarte_device, ota_event_interface.name, "/event", doc, 0);
-    astarte_bson_serializer_destroy(&bs);
+    astarte_bson_serializer_destroy(bs);
 }
