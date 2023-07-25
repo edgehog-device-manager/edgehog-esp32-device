@@ -202,7 +202,7 @@ edgehog_err_t edgehog_ota_event(
 
     // Step 1 get UUID, URL and operation from Astarte request
 
-    const void *found = astarte_bson_key_lookup("uuid", event_request->bson_value, &type);
+    const void *found = astarte_bson_key_lookup("uuid", event_request->bson_element.value, &type);
     uint32_t req_uuid_len;
     const char *req_uuid = astarte_bson_value_to_string(found, &req_uuid_len);
     if (!req_uuid || type != BSON_TYPE_STRING) {
@@ -212,7 +212,7 @@ edgehog_err_t edgehog_ota_event(
     }
     ESP_LOGI(TAG, "OTA UPDATE REQUEST UUID : %s", req_uuid);
 
-    found = astarte_bson_key_lookup("url", event_request->bson_value, &type);
+    found = astarte_bson_key_lookup("url", event_request->bson_element.value, &type);
     uint32_t ota_url_len;
     const char *ota_url = astarte_bson_value_to_string(found, &ota_url_len);
     if (!ota_url || type != BSON_TYPE_STRING) {
@@ -223,7 +223,7 @@ edgehog_err_t edgehog_ota_event(
         return EDGEHOG_ERR_OTA_INVALID_REQUEST;
     }
 
-    found = astarte_bson_key_lookup("operation", event_request->bson_value, &type);
+    found = astarte_bson_key_lookup("operation", event_request->bson_element.value, &type);
     uint32_t str_value_len;
     const char *ota_operation = astarte_bson_value_to_string(found, &str_value_len);
     if (!ota_operation || type != BSON_TYPE_STRING) {

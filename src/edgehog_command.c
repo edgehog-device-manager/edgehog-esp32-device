@@ -38,7 +38,7 @@ edgehog_err_t edgehog_command_event(astarte_device_data_event_t *event_request)
     EDGEHOG_VALIDATE_INCOMING_DATA(TAG, event_request, "/request", BSON_TYPE_STRING);
 
     uint32_t len;
-    const char *command = astarte_bson_value_to_string(event_request->bson_value, &len);
+    const char *command = astarte_bson_value_to_string(event_request->bson_element.value, &len);
 
     if (strcmp(command, "Reboot") == 0) {
         ESP_LOGI(TAG, "Device will restart in 1 second");
