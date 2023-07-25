@@ -193,7 +193,7 @@ static void astarte_connection_events_handler(astarte_device_connection_event_t 
 static void astarte_data_events_handler(astarte_device_data_event_t *event)
 {
     ESP_LOGI(TAG, "Got Astarte data event, interface_name: %s, path: %s, bson_type: %d",
-        event->interface_name, event->path, event->bson_value_type);
+        event->interface_name, event->path, event->bson_element.type);
     edgehog_device_astarte_event_handler(edgehog_device, event);
 }
 
