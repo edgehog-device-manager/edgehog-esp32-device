@@ -60,7 +60,7 @@ const astarte_interface_t telemetry_config_interface
           .ownership = OWNERSHIP_SERVER,
           .type = TYPE_PROPERTIES };
 
-typedef struct astarte_list_head_t timer_list_head_t;
+typedef astarte_list_head_t timer_list_head_t;
 
 struct timer_ptr_entry_t
 {
@@ -258,8 +258,9 @@ edgehog_err_t edgehog_telemetry_config_event(astarte_device_data_event_t *event_
     int64_t period_seconds = get_telemetry_period_from_nvs(edgehog_device, telemetry_type);
     if (strcmp(endpoint, "enable") == 0) {
         bool enable;
-        if (event_request->bson_value && event_request->bson_value_type == BSON_TYPE_BOOLEAN) {
-            enable = astarte_bson_value_to_int8(event_request->bson_value);
+        if (event_request->bson_element.value
+            && event_request->bson_element.type == BSON_TYPE_BOOLEAN) {
+            enable = astarte_bson_deserializer_element_to_bool(event_request->bson_element);
         } else {
             enable = telemetry_type_is_present_in_config(edgehog_telemetry, telemetry_type);
         }
@@ -268,11 +269,14 @@ edgehog_err_t edgehog_telemetry_config_event(astarte_device_data_event_t *event_
             period_seconds = TELEMETRY_UPDATE_DISABLED;
         }
     } else if (strcmp(endpoint, "periodSeconds") == 0) {
-        if (event_request->bson_value && event_request->bson_value_type >= BSON_TYPE_INT32) {
-            if (event_request->bson_value_type == BSON_TYPE_INT32) {
-                period_seconds = astarte_bson_value_to_int32(event_request->bson_value);
+        if (event_request->bson_element.value
+            && event_request->bson_element.type >= BSON_TYPE_INT32) {
+            if (event_request->bson_element.type == BSON_TYPE_INT32) {
+                period_seconds
+                    = astarte_bson_deserializer_element_to_int32(event_request->bson_element);
             } else {
-                period_seconds = astarte_bson_value_to_int64(event_request->bson_value);
+                period_seconds
+                    = astarte_bson_deserializer_element_to_int64(event_request->bson_element);
             }
         } else {
             period_seconds = get_telemetry_period_from_config(edgehog_telemetry, telemetry_type);

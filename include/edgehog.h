@@ -54,10 +54,10 @@ typedef enum
 // clang-format on
 
 #define EDGEHOG_VALIDATE_INCOMING_DATA(TAG, EVENT_REQUEST, PATH, BSON_TYPE)                        \
-    if ((EVENT_REQUEST)->bson_value_type != (BSON_TYPE)                                            \
+    if ((EVENT_REQUEST)->bson_element.type != (BSON_TYPE)                                          \
         || strcmp((EVENT_REQUEST)->path, (PATH)) != 0) {                                           \
         ESP_LOGE(TAG, "Unable to handle request on %s having type code %i", (EVENT_REQUEST)->path, \
-            (EVENT_REQUEST)->bson_value_type);                                                     \
+            (EVENT_REQUEST)->bson_element.type);                                                   \
         return EDGEHOG_ERR;                                                                        \
     }
 

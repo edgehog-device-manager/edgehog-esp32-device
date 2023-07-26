@@ -63,11 +63,10 @@ void edgehog_storage_usage_publish(edgehog_device_handle_t edgehog_device)
 static void publish_storage_usage(
     astarte_device_handle_t astarte_device, const char *label, long free_bytes, long total_bytes)
 {
-    struct astarte_bson_serializer_t bs;
-    astarte_bson_serializer_init(&bs);
-    astarte_bson_serializer_append_int64(&bs, "freeBytes", free_bytes);
-    astarte_bson_serializer_append_int64(&bs, "totalBytes", total_bytes);
-    astarte_bson_serializer_append_end_of_document(&bs);
+    astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+    astarte_bson_serializer_append_int64(bs, "freeBytes", free_bytes);
+    astarte_bson_serializer_append_int64(bs, "totalBytes", total_bytes);
+    astarte_bson_serializer_append_end_of_document(bs);
 
     size_t path_size = strlen(label) + 2;
     char *path = malloc(path_size);
@@ -77,9 +76,8 @@ static void publish_storage_usage(
     }
     snprintf(path, path_size, "/%s", label);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     astarte_device_stream_aggregate(astarte_device, storage_usage_interface.name, path, doc, 0);
-    astarte_bson_serializer_destroy(&bs);
+    astarte_bson_serializer_destroy(bs);
     free(path);
 }

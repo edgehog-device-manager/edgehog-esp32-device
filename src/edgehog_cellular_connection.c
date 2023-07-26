@@ -48,30 +48,28 @@ void edgehog_connection_status_publish(edgehog_device_handle_t edgehog_device, c
     edgehog_registration_status registration_status, double rssi, int64_t cell_id,
     int local_area_code, int mobile_country_code, int mobile_network_code)
 {
-    struct astarte_bson_serializer_t bs;
-    astarte_bson_serializer_init(&bs);
-    astarte_bson_serializer_append_string(&bs, "carrier", carrier);
+    astarte_bson_serializer_handle_t bs = astarte_bson_serializer_new();
+    astarte_bson_serializer_append_string(bs, "carrier", carrier);
     astarte_bson_serializer_append_string(
-        &bs, "technology", edgehog_technology_to_string(technology));
+        bs, "technology", edgehog_technology_to_string(technology));
     astarte_bson_serializer_append_string(
-        &bs, "registrationStatus", edgehog_connection_status_to_string(registration_status));
-    astarte_bson_serializer_append_double(&bs, "rssi", rssi);
+        bs, "registrationStatus", edgehog_connection_status_to_string(registration_status));
+    astarte_bson_serializer_append_double(bs, "rssi", rssi);
     if (cell_id >= 0) {
-        astarte_bson_serializer_append_int64(&bs, "cellId", cell_id);
+        astarte_bson_serializer_append_int64(bs, "cellId", cell_id);
     }
     if (local_area_code >= 0) {
-        astarte_bson_serializer_append_int32(&bs, "localAreaCode", local_area_code);
+        astarte_bson_serializer_append_int32(bs, "localAreaCode", local_area_code);
     }
     if (mobile_country_code >= 0) {
-        astarte_bson_serializer_append_int32(&bs, "mobileCountryCode", mobile_country_code);
+        astarte_bson_serializer_append_int32(bs, "mobileCountryCode", mobile_country_code);
     }
     if (mobile_network_code >= 0) {
-        astarte_bson_serializer_append_int32(&bs, "mobileNetworkCode", mobile_network_code);
+        astarte_bson_serializer_append_int32(bs, "mobileNetworkCode", mobile_network_code);
     }
-    astarte_bson_serializer_append_end_of_document(&bs);
+    astarte_bson_serializer_append_end_of_document(bs);
 
-    int doc_len;
-    const void *doc = astarte_bson_serializer_get_document(&bs, &doc_len);
+    const void *doc = astarte_bson_serializer_get_document(bs, NULL);
     char *path = malloc(strlen(modem_id) + 2); // 2 = strlen("/") + 1
     if (!path) {
         ESP_LOGE(TAG, "Unable to allocate memory for path");
@@ -84,7 +82,7 @@ void edgehog_connection_status_publish(edgehog_device_handle_t edgehog_device, c
         ESP_LOGE(TAG, "Unable to publish connection status");
     }
     free(path);
-    astarte_bson_serializer_destroy(&bs);
+    astarte_bson_serializer_destroy(bs);
 }
 
 void edgehog_connection_properties_publish(edgehog_device_handle_t edgehog_device,

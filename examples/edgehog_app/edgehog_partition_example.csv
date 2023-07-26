@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: "0.7.0"
-description: Edgehog Device ESP32 SDK
-url: https://github.com/edgehog-device-manager/edgehog-esp32-device.git
-dependencies:
-  # Required IDF version
-  idf: ">=4.1"
-  astarte-device-sdk-esp32:
-    version: "v1.2.0"
-    git: https://github.com/astarte-platform/astarte-device-sdk-esp32.git
+
+# ESP-IDF Partition Table
+# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x4000,
+otadata,  data, ota,     0xd000,  0x2000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, ,        0x12c000,
+ota_0,    app,  ota_0,   ,        0x12c000,
+ota_1,    app,  ota_1,   ,        0x12c000,
