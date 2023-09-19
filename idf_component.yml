@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: "0.7.0"
+version: "0.7.1"
 description: Edgehog Device ESP32 SDK
 url: https://github.com/edgehog-device-manager/edgehog-esp32-device.git
 dependencies:
