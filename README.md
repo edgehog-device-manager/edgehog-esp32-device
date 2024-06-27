@@ -10,6 +10,26 @@ Edgehog ESP32 Device is the Edgehog component for Espressif
 [esp-idf](https://docs.espressif.com/projects/esp-idf/en/latest/), that enables remote management of
 Espressif ESP32 devices using [Astarte](https://github.com/astarte-platform/).
 
+## Implemented Features
+
+The following features are supported by this Edgehog device implementation:
+
+- OS info
+- Hardware info
+- System info
+- System status
+- Runtime info and esp-idf version
+- OTA update
+- Base image
+- Reboot command
+- Storage usage
+- Led Behavior
+- Data Rate Control for telemetry
+- Battery status API
+- Cellular Connection info API
+- Cellular Connection status API
+- Geolocation API
+
 ## Getting Started
 
 ### 1 - Install ESP-IDF Toolchain
