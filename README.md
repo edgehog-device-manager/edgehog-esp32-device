@@ -23,6 +23,7 @@ The following features are supported by this Edgehog device implementation:
 - Base image
 - Reboot command
 - Storage usage
+- WiFi APs seen by board antenna
 - Led Behavior
 - Data Rate Control for telemetry
 - Battery status API
