@@ -23,6 +23,8 @@
 #include <astarte_credentials.h>
 #include <esp_log.h>
 
+#include "astarte.h"
+#include "astarte_device.h"
 #include "edgehog_device.h"
 #include "edgehog_event.h"
 
@@ -30,8 +32,7 @@
  * Constants and defines
  ***********************************************/
 
-#define NVS_PARTITION "nvs"
-#define TAG "EDGEHOG_EXAMPLE_TASK"
+#define TAG "EXAMPLE_TASK"
 
 /************************************************
  * Static variables declarations
@@ -46,9 +47,18 @@ static edgehog_device_handle_t edgehog_device;
 /**
  * @brief Initialize an Astarte device.
  *
+ * @param notify_handle Task to be notified when the device gets connected.
  * @return The Astarte device instance handle.
  */
-static astarte_device_handle_t astarte_device_sdk_init(void);
+static astarte_device_handle_t astarte_device_sdk_init(TaskHandle_t notify_handle);
+/**
+ * @brief Initialize an Edgehog device and starts the associated astarte device.
+ *
+ * @param arg Extra args.
+ *
+ * @return The Edgehog device instance handle.
+ */
+static edgehog_device_handle_t edgehog_device_init(astarte_device_handle_t astarte_handle);
 /**
  * @brief Handler for edgehog events.
  *
@@ -84,49 +94,30 @@ static void astarte_disconnection_events_handler(astarte_device_disconnection_ev
 
 void edgehog_example_task(void *ctx)
 {
-    astarte_device_handle_t astarte_device = astarte_device_sdk_init();
-    if (astarte_device == NULL) {
-        ESP_LOGE(TAG, "Failed to initialize the Astarte device");
-        vTaskDelete(NULL);
-    }
-    astarte_err_t astarte_err = astarte_device_start(astarte_device);
-    if (astarte_err != ASTARTE_OK) {
-        ESP_LOGE(TAG, "Failed to start the Astarte device");
-        vTaskDelete(NULL);
-    }
-    ESP_LOGI(TAG, "Astarte device started");
+    astarte_device_handle_t astarte_handle = astarte_device_sdk_init(xTaskGetCurrentTaskHandle());
+    assert(astarte_handle);
+    edgehog_device = edgehog_device_init(astarte_handle);
+    assert(edgehog_device);
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        EDGEHOG_EVENTS, ESP_EVENT_ANY_ID, edgehog_event_handler, NULL, NULL));
-
-    edgehog_device_telemetry_config_t telemetry_config = {
-        .type = EDGEHOG_TELEMETRY_SYSTEM_STATUS,
-        .period_seconds = 3600,
-    };
-    edgehog_device_config_t edgehog_conf = {
-        .astarte_device = astarte_device,
-        .partition_label = NVS_PARTITION,
-        .telemetry_config = &telemetry_config,
-        .telemetry_config_len = 1,
-    };
-    edgehog_device = edgehog_device_new(&edgehog_conf);
-    if (edgehog_device == NULL) {
-        ESP_LOGE(TAG, "Failed to create the Edgehog device");
+    // Start the Astarte device
+    if (astarte_device_start(astarte_handle) != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Failed starting the Astarte device.");
         vTaskDelete(NULL);
     }
 
-    ESP_ERROR_CHECK(edgehog_device_set_system_serial_number(edgehog_device, "serial_number_1"));
-    ESP_ERROR_CHECK(edgehog_device_set_system_part_number(edgehog_device, "part_number_1"));
+    // Wait until the Astarte device is connected and the current task gets notified
+    (void) ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    ESP_LOGI(TAG, "Astarte device started and connected, starting edgehog device...");
 
+    // Start the Edgehog device
     edgehog_err_t edgehog_err = edgehog_device_start(edgehog_device);
-    if (edgehog_err != EDGEHOG_OK || edgehog_device == NULL) {
-        ESP_LOGE(TAG, "Failed to create the Edgehog device");
+    if (edgehog_err != EDGEHOG_OK) {
+        ESP_LOGE(TAG, "Failed starting the Edgehog device");
         vTaskDelete(NULL);
     }
-
     ESP_LOGI(TAG, "Edgehog device started");
 
-    while (1) {
+    while (true) {
         // In this example this task is running with the lower priority and does not starve
         // the mcu thanks to time slicing.
         // If in your code you want to run this task with a higher priority make sure not to
@@ -138,15 +129,27 @@ void edgehog_example_task(void *ctx)
  * Static functions definitions
  ***********************************************/
 
-static astarte_device_handle_t astarte_device_sdk_init(void)
+static astarte_device_handle_t astarte_device_sdk_init(TaskHandle_t notify_handle)
 {
-    astarte_credentials_use_nvs_storage(NVS_PARTITION);
-    astarte_credentials_init();
+    // Set up storage for the Astarte device
+    if (astarte_credentials_use_nvs_storage(ASTARTE_PARTITION_NAME) != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Failed setting NVS as storage defaults.");
+        return NULL;
+    }
+
+    // Initialize the credentials for the Astarte device
+    if (astarte_credentials_init() != ASTARTE_OK) {
+        ESP_LOGE(TAG, "Failed initializing the Astarte credentials.");
+        return NULL;
+    }
 
     astarte_device_config_t astarte_device_cfg = {
         .connection_event_callback = astarte_connection_events_handler,
         .disconnection_event_callback = astarte_disconnection_events_handler,
         .data_event_callback = astarte_data_events_handler,
+        .callbacks_user_data = notify_handle,
+        .credentials_secret = CONFIG_CREDENTIALS_SECRET,
+        .hwid = CONFIG_DEVICE_ID,
     };
 
     astarte_device_handle_t astarte_device = astarte_device_init(&astarte_device_cfg);
@@ -155,10 +158,49 @@ static astarte_device_handle_t astarte_device_sdk_init(void)
         return NULL;
     }
 
-    char *astarte_device_encoded_id = astarte_device_get_encoded_id(astarte_device);
-    ESP_LOGI(TAG, "[APP] Encoded device ID: %s", astarte_device_encoded_id);
-
     return astarte_device;
+}
+
+static edgehog_device_handle_t edgehog_device_init(astarte_device_handle_t astarte_handle)
+{
+    // Setup the event handler for the Edgehog device
+    esp_err_t esp_err = esp_event_handler_instance_register(
+        EDGEHOG_EVENTS, ESP_EVENT_ANY_ID, edgehog_event_handler, NULL, NULL);
+    if (esp_err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed registering the Edgehog event handler.");
+        return NULL;
+    }
+
+    // Initialize the Edgehog device
+    edgehog_device_telemetry_config_t telemetry_config = {
+        .type = EDGEHOG_TELEMETRY_SYSTEM_STATUS,
+        .period_seconds = 3600,
+    };
+    edgehog_device_config_t edgehog_conf = {
+        .astarte_device = astarte_handle,
+        .partition_label = EDGEHOG_PARTITION_NAME,
+        .telemetry_config = &telemetry_config,
+        .telemetry_config_len = 1,
+    };
+    edgehog_device_handle_t edgehog_device = edgehog_device_new(&edgehog_conf);
+    if (!edgehog_device) {
+        ESP_LOGE(TAG, "Failed initializing the Edgehog device.");
+        return NULL;
+    }
+
+    // Declare serial and part number for the example Edgehog device
+    esp_err = edgehog_device_set_system_serial_number(edgehog_device, "edgehog_example_sn_1");
+    if (esp_err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed setting the system serial number for Edgehog.");
+        return NULL;
+    }
+    esp_err
+        = edgehog_device_set_system_part_number(edgehog_device, "edgehog_example_part_number_1");
+    if (esp_err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed setting the system part number for Edgehog.");
+        return NULL;
+    }
+    return edgehog_device;
 }
 
 static void edgehog_event_handler(
@@ -188,6 +230,8 @@ static void edgehog_event_handler(
 static void astarte_connection_events_handler(astarte_device_connection_event_t *event)
 {
     ESP_LOGI(TAG, "Astarte device connected, session_present: %d", event->session_present);
+    // Unlocking the example task
+    xTaskNotifyGive(event->user_data);
 }
 
 static void astarte_data_events_handler(astarte_device_data_event_t *event)

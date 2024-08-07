@@ -51,3 +51,9 @@ doc/out
 
 # VS code config
 .vscode/
+
+# LSP cache
+.cache
+
+# Private files
+*.priv

@@ -31,12 +31,15 @@ jobs:
     strategy:
       matrix:
         idf-version:
-          - "4.4.4"
-          - "5.0.1"
+          - "4.4"
+          - "5.0"
+          - "5.1"
+          - "5.2"
+          - "5.3"
         build-system:
           - idf
     runs-on: ubuntu-latest
-    container: espressif/idf:v${{ matrix.idf-version }}
+    container: espressif/idf:release-v${{ matrix.idf-version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -48,8 +51,7 @@ jobs:
         shell: bash
       - name: Build with idf.py
         run: |
-          . $IDF_PATH/export.sh
-          pip install idf-component-manager --upgrade
+          source $IDF_PATH/export.sh
           idf.py reconfigure
           idf.py build
           # Print component size info

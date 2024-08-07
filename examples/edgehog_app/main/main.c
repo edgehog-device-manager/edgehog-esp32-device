@@ -24,13 +24,13 @@
 #include <nvs_flash.h>
 
 #include "example_task.h"
-#include "wifi_cfg.h"
+#include "wifi.h"
 
 /************************************************
  * Constants/Defines
  ***********************************************/
 
-static const char *TAG = "EDGEHOG_EXAMPLE_MAIN";
+static const char *TAG = "EXAMPLE_MAIN";
 
 /************************************************
  * Main function definition
@@ -43,8 +43,13 @@ void app_main(void)
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
+
     ESP_ERROR_CHECK(ret);
-    wifi_init();
+    ESP_ERROR_CHECK(nvs_flash_init_partition(ASTARTE_PARTITION_NAME));
+    ESP_ERROR_CHECK(nvs_flash_init_partition(EDGEHOG_PARTITION_NAME));
+
+    ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
+    wifi_init_sta();
 
     ESP_LOGI(TAG, "NVS and WIFI initialization completed.");
 
