@@ -31,4 +31,18 @@ config WIFI_PASSWORD
     default "mypassword"
     help
         WiFi password (WPA or WPA2) for the example to use.
+
+config CREDENTIALS_SECRET
+    string "Credentials secret"
+    default ""
+    help
+        Astarte device credential secret, generated when the device is added on an Astarte
+        instance.
+
+config DEVICE_ID
+    string "Device hardware ID"
+    default ""
+    help
+        Astarte device hardware id, generated when the device is added on an Astarte instance.
+
 endmenu

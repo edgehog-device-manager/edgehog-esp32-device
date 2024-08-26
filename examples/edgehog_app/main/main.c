@@ -38,12 +38,17 @@ static const char *TAG = "EDGEHOG_EXAMPLE_MAIN";
 
 void app_main(void)
 {
+    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(nvs_flash_init_partition(ASTARTE_PARTITION_NAME));
+    ESP_ERROR_CHECK(nvs_flash_init_partition(EDGEHOG_PARTITION_NAME));
+
+    // Initialize WiFi
     wifi_init();
 
     ESP_LOGI(TAG, "NVS and WIFI initialization completed.");

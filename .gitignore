@@ -51,3 +51,6 @@ doc/out
 
 # VS code config
 .vscode/
+
+# Private files
+*.priv

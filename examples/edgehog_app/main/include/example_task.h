@@ -21,6 +21,9 @@
 #ifndef EXAMPLE_TASK_H
 #define EXAMPLE_TASK_H
 
+#define ASTARTE_PARTITION_NAME "astarte"
+#define EDGEHOG_PARTITION_NAME "edgehog"
+
 /**
  * @brief Edgehog configuration task.
  *
