@@ -22,8 +22,5 @@ version: "0.7.1"
 description: Edgehog Device ESP32 SDK
 url: https://github.com/edgehog-device-manager/edgehog-esp32-device.git
 dependencies:
-  # Required IDF version
   idf: ">=4.1"
-  astarte-device-sdk-esp32:
-    version: "v1.3.1"
-    git: https://github.com/astarte-platform/astarte-device-sdk-esp32.git
+  astarte-platform/astarte-device-sdk-esp32: "1.3.3"
