@@ -26,6 +26,9 @@
 #include <astarte_bson_types.h>
 #include <esp_err.h>
 #include <esp_https_ota.h>
+#if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+#include <esp_crt_bundle.h>
+#endif
 #include <esp_log.h>
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
@@ -429,10 +432,13 @@ static edgehog_err_t perform_ota_attempt(ota_task_data_t *task_data)
 
     // Step 1 begin OTA update over HTTPS
 
-    esp_http_client_config_t http_config = {
-        .url = task_data->ota_url,
-        .timeout_ms = OTA_REQ_TIMEOUT_MS,
-    };
+    esp_http_client_config_t http_config
+        = {.url = task_data->ota_url,
+              .timeout_ms = OTA_REQ_TIMEOUT_MS,
+#if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+              .crt_bundle_attach = esp_crt_bundle_attach,
+#endif
+          };
     esp_https_ota_config_t ota_config = {
         .http_config = &http_config,
     };
