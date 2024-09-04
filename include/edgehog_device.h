@@ -51,7 +51,7 @@ typedef enum
     EDGEHOG_TELEMETRY_SYSTEM_STATUS = 3, /**< The system status telemetry type. */
     EDGEHOG_TELEMETRY_STORAGE_USAGE = 4, /**< The storage usage telemetry type. */
     EDGEHOG_TELEMETRY_BATTERY_STATUS = 5, /**< The battery status telemetry type. */
-    EDGEHOG_TELEMETRY_GEOLOCATION_INFO = 6 /**< The storage usage telemetry type. */
+    EDGEHOG_TELEMETRY_GEOLOCATION_INFO = 6 /**< The geolocation info telemetry type. */
 } telemetry_type_t;
 
 /**
