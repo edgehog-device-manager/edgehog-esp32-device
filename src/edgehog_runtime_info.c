@@ -27,7 +27,7 @@
 
 #define RUNTIME_NAME "edgehog-esp32-device"
 #define RUNTIME_URL "https://github.com/edgehog-device-manager/edgehog-esp32-device"
-#define RUNTIME_VERSION "0.7.1"
+#define RUNTIME_VERSION "0.8.0"
 
 static const char *TAG = "EDGEHOG_RUNTIME_INFO";
 
