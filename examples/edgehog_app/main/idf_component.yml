@@ -22,5 +22,5 @@ description: Example Edgehog application
 dependencies:
   idf: ">=4.4"
   edgehog-device-manager/edgehog-esp32-device:
-    version: "0.7.1"
+    version: "0.8.0"
     override_path: '../../../' # three levels up, pointing the directory with the component itself
