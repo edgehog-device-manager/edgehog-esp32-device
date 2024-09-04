@@ -18,10 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-## IDF Component Manager Manifest File
+description: Example Edgehog application
 dependencies:
-  idf:
-    version: ">=4.1.0"
-  edgehog-esp32-device:
-    version: "*"
-    path: ../../../
+  idf: ">=4.4"
+  edgehog-device-manager/edgehog-esp32-device:
+    version: "0.7.1"
+    override_path: '../../../' # three levels up, pointing the directory with the component itself
