@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: "0.7.1"
-description: Edgehog Device ESP32 SDK
-repository: "https://github.com/edgehog-device-manager/edgehog-esp32-device.git"
-url: "https://edgehog.io/"
-documentation: "https://docs.edgehog.io/snapshot/intro_user.html"
-license: "Apache-2.0"
-maintainers:
-  - Antonio Gisondi <antonio.gisondi@secomind.com>
-  - Simone Orru <simone.orru@secomind.com>
+name: ESP registry publish
 
-tags:
-  - sdk
-  - iot
-  - edgehog
+on:
+  push:
+    tags:
+      - 'v*'
 
-dependencies:
-  idf: ">=4.4"
-  astarte-platform/astarte-device-sdk-esp32: "1.3.3"
+jobs:
+  publish:
+    name: Publish release to the ESP registry
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Upload component to the component registry
+      uses: espressif/upload-components-ci-action@v1
+      with:
+        name: "edgehog-esp32-device"
+        version: ${{ github.ref_name }}
+        namespace: "edgehog-device-manager"
+        api_token: ${{ secrets.IDF_COMPONENT_API_TOKEN }}
