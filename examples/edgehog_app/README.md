@@ -10,19 +10,12 @@
 
 ### Setup project using idf component manager (recommended)
 
-* [Install the idf-component manager](https://github.com/espressif/idf-component-manager#installing-the-idf-component-manager)
+* [Install the idf-component manager](https://docs.espressif.com/projects/idf-component-manager/en/latest/)
 * run
   ```bash
   idf.py reconfigure
   ```
 
-### Setup project using git
-
-* Add Astarte component
-
-    ``` bash
-    git clone https://github.com/astarte-platform/astarte-device-sdk-esp32.git -b release-1.0 ./components/astarte-device-sdk-esp32
-    ```
 ### Configure the project
 
 Open the project configuration menu (`idf.py menuconfig`).

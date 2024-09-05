@@ -20,37 +20,15 @@ Follow the
 ### 2 - Install the IDF-Component Manager
 
 Follow the
-[idf-component manager installation guide](https://github.com/espressif/idf-component-manager#installing-the-idf-component-manager).
+[idf-component manager installation guide](https://docs.espressif.com/projects/idf-component-manager/en/latest/).
 
-### 3 - Setup a New Project
-
-Create a new CMake project:
+### 3 - Create a New Project from the edgehog_app example
 
 ```bash
-mkdir ~/hello_world
-cd ~/hello_world
-cp -r $IDF_PATH/examples/get-started/hello_world .
+idf.py create-project-from-example "edgehog-device-manager/edgehog-esp32-device^0.8.0:edgehog_app"
 ```
 
-### 4 - Setup Dependencies
-
-Create a new `idf_component.yml` in the project root directory, as follows:
-
-```yaml
-## IDF Component Manager Manifest File
-dependencies:
-  idf:
-    version: ">=4.4.4"
-  edgehog-esp32-device:
-    version: "*" # this is the latest commit on the main branch
-    git: https://github.com/edgehog-device-manager/edgehog-esp32-device.git
-  astarte-device-sdk-esp32:
-    version: "b47e453777f774835b3f86eeb0ce5d3b3a890c9c" # 'release-1.0' branch
-    git: https://github.com/astarte-platform/astarte-device-sdk-esp32.git
-
-```
-
-### 5 - Build project
+### 4 - Build project
 
 ```bash
 idf.py build
@@ -92,7 +70,10 @@ with the Free RTOS APIs and its resource usage should be evaluated separately.
 
 * [ESP32 Component Documentation](https://edgehog-device-manager.github.io/docs/snapshot/device-sdks/esp32/)
 * [Edgehog documentation](https://edgehog-device-manager.github.io/docs/snapshot/)
-* [Example app](examples/edgehog_app/)
+* Check out the examples on the right pane of the
+[edgehog-esp32-device](https://components.espressif.com/components/edgehog-device-manager/edgehog-esp32-device)
+component page or on the
+[GitHub repository](https://github.com/edgehog-device-manager/edgehog-esp32-device/tree/main/examples/edgehog_app)
 
 ## Contributing
 
