@@ -25,7 +25,7 @@ Follow the
 ### 3 - Create a New Project from the edgehog_app example
 
 ```bash
-idf.py create-project-from-example "edgehog-device-manager/edgehog-esp32-device^0.8.0:edgehog_app"
+idf.py create-project-from-example "edgehog-device-manager/edgehog-esp32-device^0.8.1:edgehog_app"
 ```
 
 ### 4 - Build project
