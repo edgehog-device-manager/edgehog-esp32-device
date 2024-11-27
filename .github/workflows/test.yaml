@@ -1,0 +1,50 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2022 SECO Mind
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: "Edgehog Test Suite"
+on:
+  # Run when pushing to stable branches
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  test-qemu:
+    runs-on: ubuntu-latest
+    container: harlem88/qemu-xtensa-idf:4.3
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Checkout astarte-device-sdk
+        uses: actions/checkout@v2
+        with:
+          repository: astarte-platform/astarte-device-sdk-esp32
+          ref: release-1.0
+          path: ./examples/edgehog_app/components/astarte-device-sdk-esp32
+      - name: Build with idf.py
+        run: |
+          . $IDF_PATH/export.sh
+          idf.py reconfigure
+          idf.py build
+        working-directory: ./test/app_test
+        shell: bash
+      - name: pytest
+        run: pytest --embedded-services=idf,qemu -s
+        working-directory: ./test/app_test
+        shell: bash
