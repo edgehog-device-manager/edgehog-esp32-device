@@ -1,6 +1,6 @@
 /** @mainpage Edgehog Device SDK ESP32 Documentation
 
-@version Unreleased
+@version 0.8.1
 
  * The Edgehog device SDK allows connecting an ESP32 device to Edgehog platform.
  *
